@@ -1,0 +1,112 @@
+---
+title: "example for git"
+output: html_document
+date: "2025-05-28"
+---
+
+## This block is for Yuetong & Renu
+
+```{r}
+hi
+
+```
+
+## This block is for Aziza
+
+```{r}
+
+
+```
+
+
+## This block is for Collin
+
+```{r}
+
+
+```
+
+## This block is for Diego
+
+```{r}
+
+
+```
+
+## This block is for Feda
+
+```{r}
+
+
+```
+
+## This block is for Grace
+
+```{r}
+
+
+```
+
+## This block is for Jeffrey
+
+```{r}
+
+
+```
+
+## This block is for Joshua
+
+```{r}
+
+
+```
+
+## This block is for Julia B
+
+```{r}
+
+
+```
+
+## This block is for Julia V
+
+```{r}
+
+
+```
+
+## This block is for Maryam
+
+```{r}
+
+
+```
+
+## This block is for River
+
+```{r}
+
+
+```
+
+## This block is for Shlok
+
+```{r}
+
+
+```
+
+## This block is for Yin
+
+```{r}
+
+
+```
+
+## This block is for Xiaoyi & Anbin
+
+```{r}
+#test
+#hello from Xiaoyi
+```
+
