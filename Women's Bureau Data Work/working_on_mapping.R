@@ -4,6 +4,7 @@ library(readxl)
 library(tigris)
 library(leaflet)
 library(sf)
+library(plotly)
 
 #import data
 labor_data <- read_excel("/Users/gracemullins/DPSG/labor_data.xlsx")
@@ -20,8 +21,12 @@ va_counties <- counties(state = "VA", cb = TRUE, class = "sf") %>%
 
 # Prepare VA_data: format FIPS codes consistently
 VA_data <- VA_data %>%
-  mutate(COUNTY_FIPS_CODE = str_pad(as.character(COUNTY_FIPS_CODE), width = 5, pad = "0")) %>%
+  mutate(COUNTY_FIPS_CODE = str_pad(as.character(COUNTY_FIPS_CODE), width = 5, pad = "0"))
 
+  # Prepare VA_data: format FIPS codes consistently
+VA_data <- VA_data %>%
+  mutate(COUNTY_FIPS_CODE = str_pad(as.character(COUNTY_FIPS_CODE), width = 5, pad = "0")) 
+  
 # Join spatial data once (keep all VA_data rows, so many-to-one join)
 map_data_all <- va_counties %>%
   left_join(VA_data, by = c("GEOID" = "COUNTY_FIPS_CODE"))
@@ -45,7 +50,7 @@ ggplot(
   )
 
 #Map of Price of Childcare Centers for 6-11 Months 2022----------------------
-ggplot(
+p <- ggplot(
   filter(map_data_all, STUDYYEAR == year_to_plot)
 ) +
   geom_sf(aes(fill = MC6to11), color = "white", size = 0.1) +
@@ -55,7 +60,7 @@ ggplot(
     title = paste("Median Weekly Price for Childcare Centers for 6–11 Month Olds in", year_to_plot),
     fill = "Median Weekly Cost"
   )
-
+ggplotly(p)
 
 #Map of Price of Childcare centers as percent of income ------------------
 # Then mutate and plot
@@ -65,7 +70,7 @@ map_data_all <- map_data_all %>%
 mutate(CCBto5_as_income = (MCBto5 * 52) / MHI)  # calculate ratio here for all years
 
 # Map: Childcare cost as % of income
-ggplot(
+k <- ggplot(
   filter(map_data_all, STUDYYEAR == year_to_plot)
 ) +
   geom_sf(aes(fill = CCBto5_as_income), color = "white", size = 0.1) +
@@ -79,4 +84,6 @@ ggplot(
     title = paste("Childcare Center Cost as % of Income (Ages B–5) in", year_to_plot),
     fill = "Cost as % of Income"
   )
+ggplotly(k)
+
 
