@@ -13,14 +13,9 @@ library(shinydashboard)
 # Data --------------------------------------------------------------------
 
 #import data
-labor_data <- read_excel("Women's Bureau Data Work/labor_data.xlsx")
-view(labor_data)
 
 # Create VA data
-VA_data <- labor_data %>%
-  filter(STATE_NAME == "Virginia")
-view(VA_data)
-write.csv(VA_data,"Data/VA_data.csv")
+VA_data <- read_excel("Data/VA_data.csv")
 
 # Prepare VA counties spatial data
 va_counties <- counties(state = "VA", cb = TRUE, class = "sf") %>%
