@@ -6,9 +6,6 @@
 cat("\014")
 rm(list = ls())
 
-setwd("C:/Users/joshu/Desktop/DSPG/Code/SIPP")
-
-
 
 library("data.table")
 library("bit64")
@@ -25,7 +22,7 @@ library(modelsummary)
 # Data Collection + Cleaning ----------------------------------------------
 
 
-data <- read.csv("cleaneddata.csv")
+data <- read.csv("Data/cleaneddata.csv")
 
 
 #Making Factors
