@@ -16,9 +16,6 @@
 cat("\014")
 rm(list = ls())
 
-#setting the WD where Data is housed
-setwd("C:/Users/joshu/Desktop/DSPG/Code/SIPP")
-
 
 #Packages needed (install.packages if these lines do not work)
 library("data.table")
@@ -32,8 +29,10 @@ library(stringr)
 
 # Data Extraction ---------------------------------------------------------
 
+#Download the data from this google drive link https://drive.google.com/file/d/1bC0NgqXxP0sTyHe3jC7cAqeDn_LJrOOC/view?usp=drive_link
+# Put this data in the Data folder of the git
 #Pulling the Data
-extracted_data <- unzip("pu2023_csv.zip", "pu2023.csv")
+extracted_data <- unzip("Data/pu2023_csv.zip", "pu2023.csv")
 
 
 #Getting all useful variables
