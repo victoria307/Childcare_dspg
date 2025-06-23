@@ -20,7 +20,7 @@ view(labor_data)
 VA_data <- labor_data %>%
   filter(STATE_NAME == "Virginia")
 view(VA_data)
-write.csv(VA_data,"VA_data.csv")
+write.csv(VA_data,"Data/VA_data.csv")
 
 # Prepare VA counties spatial data
 va_counties <- counties(state = "VA", cb = TRUE, class = "sf") %>%
