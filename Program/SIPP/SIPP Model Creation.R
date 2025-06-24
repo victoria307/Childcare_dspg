@@ -22,7 +22,7 @@ library(modelsummary)
 # Data Collection + Cleaning ----------------------------------------------
 
 
-data <- read.csv("Data/cleaneddata.csv")
+data <- read.csv("Data/SIPPcleaneddata.csv")
 
 
 #Making Factors
@@ -45,6 +45,9 @@ data$Race <- as.factor(data$Race)
 data$Race <- factor(data$Race,
                     levels = c("Residual", "White", "Black", "Asian"))
 
+HRsData <- data %>% 
+  filter(HRSWorked > 0)
+
 
 
 # Model Creation ----------------------------------------------------------
@@ -55,7 +58,7 @@ TimeLost1 <- lm(
   TimeLost ~ NonMetro + Female + SingleFamily + WelfareorSS +
     Education + ParentAge + WorkFromHome + Race + Income +
     Kid2 + Kid3 + Kid4 + Kid5 + Kid6,
-  data
+  data, weights = Weight
 )
 summary(TimeLost1)
 modelsummary(TimeLost1, 
@@ -65,12 +68,11 @@ modelsummary(TimeLost1,
 
 
 # Logistic, removed work from home
-EMP1 <- glm(
+EMP1 <- lm(
   EMP ~ NonMetro + Female + SingleFamily + WelfareorSS +
     Education + ParentAge + Race + Income +
     Kid2 + Kid3 + Kid4 + Kid5 + Kid6,
-  data,
-  family = binomial
+  data, weights = Weight
 )
 summary(EMP1)
 modelsummary(EMP1, 
@@ -83,7 +85,7 @@ HRSWorked1 <- lm(
   HRSWorked ~ NonMetro + Female + SingleFamily + WelfareorSS +
     Education + ParentAge + WorkFromHome + Race + Income +
     Kid2 + Kid3 + Kid4 + Kid5 + Kid6,
-  data
+  HRsData, weights = Weight
 )
 summary(HRSWorked1)
 modelsummary(HRSWorked1, 
@@ -96,8 +98,8 @@ modelsummary(HRSWorked1,
 TimeLostFE <- feols(
   TimeLost ~ NonMetro + Female + SingleFamily + WelfareorSS +
     Education + ParentAge + WorkFromHome + Race + Income +
-    Kid2 + Kid3 + Kid4 + Kid5 + Kid6 |HouseholdID +PersonalNumber + TimeID,
-  data
+    Kid2 + Kid3 + Kid4 + Kid5 + Kid6 |PersonalNumber + TimeID,
+  data, weights = ~Weight
 )
 summary(TimeLostFE)
 modelsummary(TimeLostFE, 
@@ -105,12 +107,11 @@ modelsummary(TimeLostFE,
              statistic = "p.value",
              output = "latex")
 
-EMPFE <- feglm(
+EMPFE <- feols(
   EMP ~ NonMetro + Female + SingleFamily + WelfareorSS +
     Education + ParentAge + WorkFromHome + Race + Income +
-    Kid2 + Kid3 + Kid4 + Kid5 + Kid6 | HouseholdID + PersonalNumber + TimeID,
-  data,
-  family = binomial()
+    Kid2 + Kid3 + Kid4 + Kid5 + Kid6 | PersonalNumber + TimeID,
+  data, weights = ~Weight
 )
 summary(EMPFE)
 modelsummary(EMPFE, 
@@ -121,8 +122,8 @@ modelsummary(EMPFE,
 HRSWorkedFE <- feols(
   HRSWorked ~ NonMetro + Female + SingleFamily + WelfareorSS +
     Education + ParentAge + WorkFromHome + Race + Income +
-    Kid2 + Kid3 + Kid4 + Kid5 + Kid6 | HouseholdID + PersonalNumber + TimeID,
-  data
+    Kid2 + Kid3 + Kid4 + Kid5 + Kid6 | PersonalNumber + TimeID,
+  HRsData, weights = ~Weight
 )
 summary(HRSWorkedFE)
 modelsummary(HRSWorkedFE, 
@@ -171,12 +172,12 @@ data2 <- data %>%
   mutate(TimeLostFactor = if_else(TimeLost>0,1,0))
 
 ### Hurdle Part 1 ----
-Hurdle1<- glm(
+Hurdle1<- lm(
   TimeLostFactor ~ NonMetro + Female + SingleFamily + WelfareorSS +
     Education + ParentAge + WorkFromHome + Race + Income +
     Kid2 + Kid3 + Kid4 + Kid5 + Kid6,
   data2,
-  family = binomial
+  weights = Weight
 )
 summary(Hurdle1)
 
@@ -189,7 +190,7 @@ Hurdle2<- lm(
   TimeLost ~ NonMetro + Female + SingleFamily + WelfareorSS +
     Education + ParentAge + WorkFromHome + Race + Income +
     Kid2 + Kid3 + Kid4 + Kid5 + Kid6,
-  data3
+  data3, weights = Weight
 )
 
 summary(Hurdle2)
