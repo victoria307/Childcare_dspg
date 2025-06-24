@@ -58,7 +58,7 @@ data[] <- lapply(data, function(x) {
 })
 
 
-# Alternative to API ---------------------------------------------------------
+# Alternative to API (Will Cause Error if File not Downloaded) ---------------------------------------------------------
 
 #If API does not work
 #Download the data from this google drive link https://drive.google.com/file/d/1bC0NgqXxP0sTyHe3jC7cAqeDn_LJrOOC/view?usp=drive_link
@@ -104,7 +104,6 @@ data <- pu %>%
 
 
 # Data Cleaning -----------------------------------------------------------
-
 
 
 ## Filtering --------------------------------------------------------------
