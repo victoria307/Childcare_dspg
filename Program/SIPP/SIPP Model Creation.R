@@ -67,7 +67,6 @@ modelsummary(TimeLost1,
              output = "latex")
 
 
-# Logistic, removed work from home
 EMP1 <- lm(
   EMP ~ NonMetro + Female + SingleFamily + WelfareorSS +
     Education + ParentAge + Race + Income +
