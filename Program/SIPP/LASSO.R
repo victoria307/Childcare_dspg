@@ -9,7 +9,7 @@ library("data.table")
 library("bit64")
 library("dplyr")
 
-data <- read.csv("cleaneddata.csv")
+data <- read.csv("SIPPcleaneddata.csv")
 data <- data[complete.cases(data[, c("TAGE", "ESEX", "TEHC_METRO", "TEHC_REGION", 
                                      "EPAYHELP", "kid1", "kid2", "kid3",
                                      "kid4", "kid5", "kid6", "EducationLevel",
