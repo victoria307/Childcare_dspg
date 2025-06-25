@@ -18,7 +18,7 @@ model_data <- data %>%
   select(
     studyyear, county_name, county_fips_code,  # Keep time/location info
     femr_20to64,             # Target variable
-    mcinfant, mfccinfant,    # Childcare prices
+    mcinfant, mfccinfant, mctoddler, mcpreschool,    # Childcare prices
     mhi, mfi,                # Income
     pr_f, pr_p,              # Poverty
     onerace_w, onerace_b, hispanic,  # Race
