@@ -4,6 +4,7 @@ library(readxl)
 library(dplyr)
 library(janitor)
 library(tidyr)
+library(writexl)
 
 # Loads the dataset
 data <- read_excel("Women's Bureau Data Work/Female Labor Force Participation/Virginia_Only.xlsx")
@@ -28,3 +29,4 @@ model_data <- data %>%
 
 # Preview cleaned dataset
 glimpse(model_data)
+write_xlsx(model_data, path = "Virginia_Model_Data.xlsx")
