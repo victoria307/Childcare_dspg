@@ -77,6 +77,9 @@ data <- data %>%
     Kid5 = case_when(SPANEL - TCBYR_5 <= 13 & SPANEL - TCBYR_5 >= 0 ~ 1, TRUE ~ 0),
     Kid6 = case_when(SPANEL - TCBYR_6 <= 13 & SPANEL - TCBYR_6 >= 0 ~ 1, TRUE ~ 0)
   )
+data <- data %>%
+  mutate(KidsUnder5 = factor(rowSums(select(., Kid1:Kid5), na.rm = TRUE)))
+
 
 #Creating Age of Child Buckets
 # 1 = infant (0 - 1)
@@ -211,31 +214,24 @@ data <- data %>%
 summary(data$WorkFromHome)
 
 
+# Making Final Data -------------------------------------------------------
+
+
 data2 <- data %>% 
   select(38:ncol(data)) %>% 
-  filter(Kid1 == 1) %>% 
-  filter(Weight != 0)
-
-mean(data$ChildCareCost[data$WelfareorSS == 1])
-mean(data$ChildCareCost[data$WelfareorSS == 0 & data$ChildCareCost > 0])
+  filter(KidsUnder5 != 0)  %>% 
+  filter(Weight != 0) %>% 
+  mutate(EMP = EMP * 100)
 
 
-HRSWorkedData <- data2 %>% 
-  filter(EMP == 1)
 
-TimeLost1 <- lm(
-  TimeLost ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCost +
-    Education + ParentAge + WorkFromHome + Race + Income +
-    Kid2 + Kid3 + Kid4 + Kid5 + Kid6,
-  data2, weights = Weight
-)
-summary(TimeLost1)
+# EMP Model ---------------------------------------------------------------
+
 
 EMP1 <- lm(
   EMP ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCost +
-             Education + ParentAge + WorkFromHome + Race + Income +
-             Kid2 + Kid3 + Kid4 + Kid5 + Kid6,
-           data2, weights = Weight
+    Education + ParentAge + WorkFromHome + Race + Income + KidsUnder5,
+  data2, weights = Weight
 )
 summary(EMP1)
 
@@ -248,16 +244,20 @@ EMP1 <- feols(
   data2, weights = ~Weight
 )
 summary(EMP1)
-summary(data2$ChildCareCost[data2$ChildCareCost>0])
-summary(data2$ChildCareCost)
+
 
 mean(data2$ChildCareCost>0)
 
 
+# IV EMP Model ------------------------------------------------------------
+#This Model Is Different from the 2020 SIPP Data Clearning and other files BC
+# New Factor variable for number of kids under AGe
+# Messing around the age to count a child
+# Multiplied Employment by 100 and divided Child Care cost by 100 to better understand coef
+
 IVCCCost <- feols(
   ChildCareCost ~ NonMetro + Female + SingleFamily + WelfareorSS +
-    Education + ParentAge + Race +
-    Kid2 + Kid3 + Kid4 + Kid5 + Kid6|PID + TimeID,
+    Education + ParentAge + Race + KidsUnder5|PID + TimeID,
   data2, weights = ~Weight
 )
 summary(IVCCCost)
@@ -266,14 +266,15 @@ modelsummary(IVCCCost,
              statistic = "p.value",
              output = "latex")
 
-data2$PredictedCost <- predict(IVCCCost)
+
+data2$PredictedCost <- predict(IVCCCost)/100
+
 
 
 IVEMP <- feols(
   EMP ~ NonMetro + Female + SingleFamily + PredictedCost  +
     PredictedCost:NonMetro + PredictedCost:Female +
-    Education + ParentAge + Race +
-    Kid2 + Kid3 + Kid4 + Kid5 + Kid6|PID + TimeID,
+    Education + ParentAge + Race + KidsUnder5|PID + TimeID,
   data2, weights = ~Weight
 )
 summary(IVEMP)
@@ -289,6 +290,20 @@ head(data2)
 
 
 
+
+# Other Models ------------------------------------------------------------
+
+
+HRSWorkedData <- data2 %>% 
+  filter(EMP == 1)
+
+TimeLost1 <- lm(
+  TimeLost ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCost +
+    Education + ParentAge + WorkFromHome + Race + Income +
+    KidsUnder5,
+  data2, weights = Weight
+)
+summary(TimeLost1)
 
 
 HRSWorked1 <- lm(
