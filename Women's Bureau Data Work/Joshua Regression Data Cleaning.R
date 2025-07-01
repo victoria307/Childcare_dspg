@@ -1,3 +1,9 @@
+#### This Code is very incomplete
+### Here are the things I wanted to do but could not finish
+### Combine Rural and Urban Information (Complete)
+### Combine more employment data 
+### Filter columns needed from Womens bureau emp data
+
 cat("\014")
 rm(list=ls())
 
@@ -11,39 +17,10 @@ VAChar <- read.csv("Data/VACountyCharacteristics.csv")
 unique(EMPdata$STUDYYEAR)
 
 RuralData <- RuralData %>% 
-  filter(STATE == 51) %>% 
+  filter(STATE_NAME == "Virginia") %>% 
   mutate(COUNTY_FIPS_CODE = as.numeric(paste0(STATE,COUNTY))) %>% 
   select(COUNTY_FIPS_CODE, POPPCT_URB) %>% 
   mutate(Urban = if_else(POPPCT_URB > .5,1,0))
-
-
-# Redundant Not Used ------------------------------------------------------
-
-
-#EMPdata <- EMPdata %>% 
-  #select(STATE_NAME, STATE_ABBREVIATION, COUNTY_NAME, COUNTY_FIPS_CODE, STUDYYEAR, 
-         #EMR_20to64, FEMR_20to64, UNR_20to64, FUNR_20to64, FLFPR_20to64, FLFPR_20to64_UNDER6,
-         #FLFPR_20to64_6to17, FLFPR_20to64_UNDER6_6to17, PR_F, PR_P, MFI, MFI_2022, 
-         #FME, TOTALPOP, ONERACE_W, ONERACE_B, ONERACE_I, ONERACE_A, ONERACE_H,
-         #HOUSEHOLDS, H_UNDER6_BOTHWORK, H_UNDER6_FWORK, H_UNDER6_MWORK, H_UNDER6_SINGLEM_STATE,
-         #MCBto5, MC6to11, MC12to17, MC18to23, MC24to29, MC30to35, MC36to41, MC42to47,
-         #MC48to53, MC54toSA, MCSA, MFCCBto5, MFCC6to11, MFCC12to17, MFCC18to23, MFCC24to29,
-         #MFCC30to35, MFCC36to41, MFCC42to47, MFCC48to53, MFCC54toSA, MFCCSA, MCINFANT, 
-         #MCTODDLER,MCPRESCHOOL, MFCCINFANT, MFCCTODDLER, MFCCPRESCHOOL, H_UNDER6_SINGLEM         )
-
-#EMPdata <- EMPdata %>% 
-  #filter(STUDYYEAR >= 2010) %>% 
-  #select(STATE_NAME, STATE_ABBREVIATION, COUNTY_NAME, COUNTY_FIPS_CODE, STUDYYEAR, 
-         #EMR_20to64, FEMR_20to64, UNR_20to64, FUNR_20to64, FLFPR_20to64, FLFPR_20to64_UNDER6,
-         #FLFPR_20to64_6to17, FLFPR_20to64_UNDER6_6to17, PR_F, PR_P, MFI, MFI_2022, 
-         #FME, TOTALPOP, ONERACE_W, ONERACE_B, ONERACE_I, ONERACE_A, ONERACE_H,
-         #HOUSEHOLDS, H_UNDER6_BOTHWORK, H_UNDER6_FWORK, H_UNDER6_MWORK, H_UNDER6_SINGLEM_STATE,
-         #MCINFANT, MCTODDLER,MCPRESCHOOL, MFCCINFANT, MFCCTODDLER, MFCCPRESCHOOL,
-         #H_UNDER6_SINGLEM)
-
-# Continue ----------------------------------------------------------------
-
-
 
 WBNameChange <- EMPdata %>% 
   mutate(State = STATE_NAME,
@@ -97,7 +74,7 @@ RuralData <- RuralData %>%
 
 Merged <- left_join(EMPdata, RuralData, by = "COUNTY_FIPS_CODE")
 
-#write.csv(Merged,"Data/EMPandRural.csv")
+write.csv(Merged,"Data/EMPandRural.csv")
 
 Vars <- c("State")
 data <- Merged %>% 
