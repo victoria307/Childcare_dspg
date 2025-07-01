@@ -102,7 +102,7 @@ server <- function(input, output, session) {
         smoothFactor = 0.5,
         popup = ~paste0(
           "<b>", NAME, "</b><br>",
-          "Income-adjusted childcare cost: ", round(Residuals_Normalized, 2), "<br>",
+          "Childcare affordability scores, adjusted for income differences: ", round(Residuals_Normalized, 2), "<br>",
           "Median Family Income: $", formatC(MFI, format = "f", big.mark = ",", digits = 0)
         )
       ) %>%
