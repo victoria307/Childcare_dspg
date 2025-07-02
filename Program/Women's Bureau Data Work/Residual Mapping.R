@@ -7,7 +7,7 @@ library("tidyr")
 library(leaflet)
 library(purrr)
 library(broom)
-library(leaflet)
+library(shiny)
 library(tigris)
 library(sf)
 
@@ -60,7 +60,7 @@ va_map_data <- va_counties %>%
   left_join(results, by = c("GEOID" = "COUNTY_FIPS_CODE"))
 
 va_map_data <- st_transform(va_map_data, crs = 4326)
-pal <- colorQuantile("YlOrRd", domain = va_map_data$MFCCPRESCHOOL, n = 5)
+
 
 
 # UI
@@ -71,13 +71,14 @@ ui <- fluidPage(
       sliderInput("year", "Select Year:",
                   min = min(va_map_data$STUDYYEAR),
                   max = max(va_map_data$STUDYYEAR),
-                  value = min(va_map_data$STUDYYEAR),
+                  value = max(va_map_data$STUDYYEAR),
                   step = 1,
                   sep = ""),
       selectInput("type", "Select Childcare Type:",
-                  choices = sort(unique(va_map_data$CostType))),
-      actionButton("play", "▶ Play"),
-      actionButton("pause", "⏸ Pause")
+                  choices = c("Median Family Based Infant Care", "Median Family Based Toddler Care",
+                              "Median Family Based Preschool Care", "Median Center Based Infant Care",
+                              "Median Center Based Toddler Care", "Median Cetner Based Preschool Care"),
+                  selected = "Median Family Based Infant Care")
     ),
     mainPanel(
       leafletOutput("childcareMap", height = 600)
@@ -95,43 +96,6 @@ server <- function(input, output, session) {
       filter(STUDYYEAR == input$year, CostType == input$type)
   })
   
-  # Debugging output
-  observe({
-    data_now <- filtered_data()
-    cat("🧪 Filtered Data Check:\n")
-    cat("  Rows returned:", nrow(data_now), "\n")
-    cat("  Year:", input$year, "\n")
-    cat("  CostType:", input$type, "\n")
-    if (nrow(data_now) == 0) {
-      cat("⚠️  Warning: No data for this selection.\n")
-    }
-  })
-  
-  # Handle Play button
-  observeEvent(input$play, {
-    playing(TRUE)
-  })
-  
-  # Handle Pause button
-  observeEvent(input$pause, {
-    playing(FALSE)
-  })
-  
-  # Animate year
-  observe({
-    req(playing())
-    isolate({
-      current_year <- input$year
-      years <- sort(unique(va_map_data$STUDYYEAR))
-      next_year <- years[which(years == current_year) + 1]
-      if (!is.na(next_year)) {
-        updateSliderInput(session, "year", value = next_year)
-      } else {
-        playing(FALSE)  # Stop if at final year
-      }
-    })
-    invalidateLater(1000, session)
-  })
   
   # Set consistent color scale across all data
   pal <- colorNumeric(
@@ -163,14 +127,19 @@ server <- function(input, output, session) {
         smoothFactor = 0.5,
         popup = ~paste0(
           "<b>", NAME, "</b><br>",
-          "Childcare affordability scores, adjusted for income differences: ", round(Residuals_Normalized, 2), "<br>",
+          "Childcare affordability scores, adjusted for income: ", round(Residuals_Normalized, 2), "<br>",
           "Median Family Income: $", formatC(MFI, format = "f", big.mark = ",", digits = 0)
         )
       ) %>%
       clearControls() %>%
       addLegend(
         position = "bottomright",
-        pal = pal,
+        pal = colorBin(
+          palette = "YlOrRd",
+          domain = data_now$Residuals_Normalized,
+          bins = seq(0, 100, by = 20),  # Breaks every 20 units
+          pretty = FALSE
+        ),
         values = data_now$Residuals_Normalized,
         title = "Income-adjusted childcare costs",
         opacity = 0.8
