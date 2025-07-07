@@ -65,7 +65,7 @@ va_map_data <- st_transform(va_map_data, crs = 4326)
 
 # UI
 ui <- fluidPage(
-  titlePanel("Income-Adjusted Childcare Costs in Virginia"),
+  titlePanel("Income-Adjusted Childcare Affordability Scores in Virginia"),
   sidebarLayout(
     sidebarPanel(
       sliderInput("year", "Select Year:",

@@ -9,6 +9,7 @@ rm(list=ls())
 
 library(readxl)
 library(dplyr)
+library(fixest)
 
 EMPdata <- read.csv("Data/VA_data.csv")
 RuralData <- read_xlsx("Data/Census County Classification.xlsx")
@@ -73,8 +74,28 @@ RuralData <- RuralData %>%
   filter(STATE == 51)
 
 Merged <- left_join(EMPdata, RuralData, by = "COUNTY_FIPS_CODE")
+ModelData <- left_join(WBNameChange, RuralData, by = "COUNTY_FIPS_CODE")
+#write.csv(Merged,"Data/EMPandRural.csv")
 
-write.csv(Merged,"Data/EMPandRural.csv")
+Model1 <- lm(ModelData$FLFPR_20to64_UNDER6 ~ ModelData$Urban + ModelData$MCINFANT+
+               ModelData$MCTODDLER + ModelData$MCPRESCHOOL + ModelData$MFCCINFANT +
+               ModelData$MFCCTODDLER + ModelData$MFCCPRESCHOOL)
+summary(Model1)
+
+Model2 <- feols(FLFPR_20to64_UNDER6 ~ MCINFANT+
+                  MCTODDLER + MCPRESCHOOL + MFCCINFANT +
+                  MFCCTODDLER + MFCCPRESCHOOL|County,
+                data = ModelData)
+summary(Model2)
+
+summary(ModelData$FLFPR_20to64_UNDER6)
+var(ModelData$FLFPR_20to64_UNDER6)
+
+
+
+
+# Random Stuff ------------------------------------------------------------
+
 
 Vars <- c("State")
 data <- Merged %>% 

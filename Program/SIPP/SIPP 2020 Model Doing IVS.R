@@ -1,3 +1,6 @@
+#Notes
+#looking at changes to Age Indicator
+
 #Clearing the workspace
 cat("\014")
 rm(list = ls())
@@ -18,8 +21,10 @@ library(stargazer)
 library(modelsummary)
 library(car)
 library(AER)
+library(ggplot2)
 
-
+#Can't put actual file on git bc too big
+#This file is in my own data foler
 setwd("C:/Users/joshu/Desktop/DSPG/Data")
 extracted_data <- unzip("pu2020_csv.zip", "pu2020.csv")
 
@@ -28,7 +33,7 @@ extracted_data <- unzip("pu2020_csv.zip", "pu2020.csv")
 pu <- fread(extracted_data, sep = "|", select = c(
   "SSUID","SHHADID","PNUM","MONTHCODE","TDEPNDNTEXP","SPANEL","WPFINWGT", "EEDUC","TAGE","ESEX", "ERACE", "EMS", "RFAMKIND", "TEHC_METRO", "TEHC_REGION","EOTHR", "THTOTINC",
   "EPAR", "EPAYHELP","ETIMELOST", "ETIMELOST_TP", "EWHOPAID1", "ELIST", "TWKHRS1", "TWKHRS2", "TWKHRS3", "TWKHRS4",
-  "TWKHRS5", "TMWKHRS", "EJB1_PVWKTR9", 'TCBYR_1', 'TCBYR_2', 'TCBYR_3', 'TCBYR_4', 'TCBYR_5', 'TCBYR_6', "EJB1_SCRNR"
+  "TWKHRS5", "TMWKHRS", "EJB1_PVWKTR9", 'TCBYR_1', 'TCBYR_2', 'TCBYR_3', 'TCBYR_4', 'TCBYR_5', 'TCBYR_6', "EJB1_SCRNR", "TST_INTV"
   
 ))
 data <- pu
@@ -38,8 +43,17 @@ data <- data %>%
   filter(TAGE >= 18) %>% 
   filter(TAGE <= 67) 
 
-
-
+## Identification Variables
+#Household ID
+data <- data %>% 
+  mutate(HouseholdID = SSUID,
+         PersonalNumber = PNUM,
+         PID = paste(SSUID, PNUM, sep = ""),
+         Month = MONTHCODE,
+         Year = SPANEL,
+         TimeID = paste(Month, Year, sep = ""),
+         Weight = WPFINWGT,
+         State = TST_INTV) 
 ## Outcome Variables ----
 
 #Harmonizing Hours lost into standard unit (hours)
@@ -70,7 +84,7 @@ data <- data %>%
 
 ## Child Variables -------------------------------------------
 
-#Creating Indicator Variables for kids under the age of 13
+#Creating Indicator Variables for kids under the age of 5
 data <- data %>% 
   mutate(
     Kid1 = case_when(SPANEL - TCBYR_1 <= 5 & SPANEL - TCBYR_1 >= 0 ~ 1, TRUE ~ 0),
@@ -164,8 +178,10 @@ data <- data %>%
   mutate(Race = factor(ERACE,
                        levels = c(1,2,3,4),
                        labels = c("White", "Black", "Asian", "Residual")))
+
+#Child Care Cost (in 100s)
 data <- data %>% 
-  mutate(ChildCareCost = replace_na(TDEPNDNTEXP,0))
+  mutate(ChildCareCostper100 = replace_na(TDEPNDNTEXP,0)/100)
 
 #Income
 summary(data$THTOTINC)
@@ -173,15 +189,6 @@ sum(is.na(data$THTOTINC))
 data <- data %>% 
   mutate(Income = THTOTINC)
 
-#Household ID
-data <- data %>% 
-  mutate(HouseholdID = SHHADID,
-         PersonalNumber = PNUM,
-         PID = paste(SHHADID, PNUM, sep = ""),
-         Month = MONTHCODE,
-         Year = SPANEL,
-         TimeID = paste(Month, Year, sep = ""),
-         Weight = WPFINWGT) 
 
 
 
@@ -221,10 +228,41 @@ summary(data$WorkFromHome)
 
 
 data2 <- data %>% 
-  select(38:ncol(data)) %>% 
+  select(39:ncol(data)) %>% 
   filter(KidsUnder5 != 0)  %>% 
   filter(Weight != 0) %>% 
   mutate(EMP = EMP * 100)
+
+
+
+# VA Dataset --------------------------------------------------------------
+# Future Analysis looking at who qualifies for subsidy
+#VAData <- data %>% 
+  #select(39:ncol(data)) %>% 
+  #filter(State == 51)
+#write.csv(VAData,"17-20VASIPPData.csv")
+#length(unique(VAData$PID))
+
+
+# Checking Some Stuff (PIDs) but should be fine ---------------------------
+
+
+unique_people <- data2 %>%
+  select(HouseholdID, PersonalNumber, KidsUnder5) %>%
+  distinct() %>%
+  group_by(HouseholdID) %>%
+  summarise(
+    num_people = n_distinct(PersonalNumber),
+    kids = first(as.numeric(as.character(KidsUnder5))),
+    hh_size = num_people + kids
+  )
+check <- data2 %>% 
+  filter(HouseholdID == 41808644918)
+
+Subsidy <- data2 %>%
+  group_by(HouseholdID) %>%
+  mutate(hh_size = n_distinct(PersonalNumber) + as.numeric(as.character(first(KidsUnder5)))) %>%
+  ungroup()
 
 
 
@@ -232,7 +270,8 @@ data2 <- data %>%
 
 
 EMP1 <- lm(
-  EMP ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCost +
+  EMP ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCostper100 +
+    ChildCareCostper100:NonMetro + ChildCareCostper100:Female+
     Education + ParentAge + WorkFromHome + Race + Income + KidsUnder5,
   data2, weights = Weight
 )
@@ -240,34 +279,107 @@ summary(EMP1)
 
 
 EMP1 <- feols(
-  EMP ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCost +
-    NonMetro*ChildCareCost + Female*ChildCareCost+
-    Education + ParentAge  + Race +
-    Kid2 + Kid3 + Kid4 + Kid5 + Kid6|PID + TimeID,
+  EMP ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCostper100 +
+    NonMetro*ChildCareCostper100 + Female*ChildCareCostper100+
+    Education + ParentAge  + Race + KidsUnder5|HouseholdID + TimeID,
   data2, weights = ~Weight
 )
 summary(EMP1)
 
+#Showing Denisty Chart of Child Care Costs
+data2 %>%
+  filter(ChildCareCostper100 > 0) %>%
+  mutate(ChildCareCost = ChildCareCostper100 * 100) %>%
+  ggplot(aes(x = ChildCareCost)) +
+  geom_histogram(aes(y = ..density..), bins = 30, fill = "lightblue", color = "black") +
+  geom_density(color = "red", size = 1) +
+  scale_x_continuous(breaks = seq(0, 6000, by = 500),  # adjust max based on your data
+                     limits = c(0, 6000))+
+  labs(title = "Distribution of Child Care Cost", x = "Child Care Cost", y = "Density")
+median(data2$ChildCareCostper100[data2$ChildCareCostper100>0])
 
-mean(data2$ChildCareCost>0)
+check <- data2 %>% 
+  filter(ChildCareCostper100>0) %>% 
+  select(HouseholdID, PersonalNumber, Month, Year, ChildCareCostper100, KidsUnder5)
+
+modelsummary(EMP1, 
+             stars = TRUE,
+             statistic = "p.value",
+             output = "latex")
 
 
-# IV EMP Model ------------------------------------------------------------
+
+
+
+# IV EMP Model (No FE) ----------------------------------------------------
+IVCCCost <- lm(
+  ChildCareCostper100 ~ NonMetro + Female + SingleFamily + WelfareorSS +
+    Education + ParentAge + Race + KidsUnder5,
+  data2, weights = Weight
+)
+summary(IVCCCost)
+linearHypothesis(IVCCCost, c("WelfareorSS = 0"), test = "F")
+
+
+IVCOSTxFemale <- lm(
+  I(ChildCareCostper100 * Female) ~ NonMetro + SingleFamily + WelfareorSS + 
+    WelfareorSS:Female + Education + ParentAge + Race + KidsUnder5,
+  data = data2,
+  weights = Weight
+)
+summary(IVCOSTxFemale)
+linearHypothesis(IVCOSTxFemale, c("WelfareorSS = 0", "WelfareorSS:Female = 0"), test = "F")
+
+
+IVCOSTxNonMetro <- lm(
+  I(ChildCareCostper100 * NonMetro) ~  WelfareorSS:NonMetro+ Female + SingleFamily + WelfareorSS +
+    Education + ParentAge + Race + KidsUnder5,
+  data2, weights = Weight
+)
+summary(IVCOSTxNonMetro)
+linearHypothesis(IVCOSTxNonMetro, c("WelfareorSS = 0", "WelfareorSS:NonMetro = 0"), test = "F")
+
+
+IVData <- data2 %>% 
+  mutate(PredictedCost = predict(IVCCCost),
+         PredictedFemale = predict(IVCOSTxFemale),
+         PredictedNonMetro = predict(IVCOSTxNonMetro))
+
+
+IVEMP <- lm(
+  EMP ~ NonMetro + Female + SingleFamily + PredictedCost  +
+    PredictedNonMetro + PredictedFemale +
+    Education + ParentAge + Race + KidsUnder5,
+  IVData, weights = Weight
+)
+modelsummary(IVEMP, 
+             stars = TRUE,
+             statistic = "p.value",
+             output = "latex")
+summary(IVEMP)
+
+
+# IV Fixed Effects EMP Model ------------------------------------------------------------
 #This Model Is Different from the 2020 SIPP Data Clearning and other files BC
 # New Factor variable for number of kids under AGe
 # Messing around the age to count a child
 # Multiplied Employment by 100 and divided Child Care cost by 100 to better understand coef
 # Check F stat for strength of IV, Looking for above 10
-IVCCCost <- feols(
+# Problem: All the IVS are super weak
+FEIVCCCost <- feols(
   ChildCareCost ~ NonMetro + Female + SingleFamily + WelfareorSS +
-    Education + ParentAge + Race + KidsUnder5|PID + TimeID,
+    Education + ParentAge + Race + KidsUnder5|HouseholdID + TimeID,
   data2, weights = ~Weight
 )
+summary(IVCCCost)
+
+
+
 linearHypothesis(IVCCCost, c("WelfareorSS = 0"), test = "F")
 
-IVCOSTxFemale <- feols(
+FEIVCOSTxFemale <- feols(
   I(ChildCareCost * Female) ~ NonMetro + SingleFamily + WelfareorSS + 
-    WelfareorSS:Female + Education + ParentAge + Race + KidsUnder5 | PID + TimeID,
+    WelfareorSS:Female + Education + ParentAge + Race + KidsUnder5 | HouseholdID + TimeID,
   data = data2,
   weights = ~Weight
 )
@@ -275,7 +387,7 @@ linearHypothesis(IVCOSTxFemale, c("WelfareorSS = 0", "WelfareorSS:Female = 0"), 
 
 
 
-IVCOSTxNonMetro <- feols(
+FEIVCOSTxNonMetro <- feols(
   I(ChildCareCost * NonMetro) ~  WelfareorSS:NonMetro+ Female + SingleFamily + WelfareorSS +
     Education + ParentAge + Race + KidsUnder5|PID + TimeID,
   data2, weights = ~Weight
@@ -287,15 +399,9 @@ linearHypothesis(IVCOSTxNonMetro, c("WelfareorSS = 0", "WelfareorSS:NonMetro = 0
 
 
 summary(IVCCCost)
-modelsummary(IVCCCost, 
-             stars = TRUE,
-             statistic = "p.value",
-             output = "latex")
-
-
-data2$PredictedCost <- predict(IVCCCost)/100
-data2$PredictedFemale <- predict(IVCOSTxFemale)
-data2$PredictedNonMetro <- predict(IVCOSTxNonMetro)
+data2$PredictedCost <- predict(FEIVCCCost)/100
+data2$PredictedFemale <- predict(FEIVCOSTxFemale)
+data2$PredictedNonMetro <- predict(FEIVCOSTxNonMetro)
 
 
 
@@ -306,15 +412,7 @@ IVEMP <- feols(
   data2, weights = ~Weight
 )
 summary(IVEMP)
-modelsummary(IVEMP, 
-             stars = TRUE,
-             statistic = "p.value",
-             output = "latex")
 
-summary(EMP1)
-head(data2)
-
-library(fixest)
 
 
 
@@ -344,23 +442,23 @@ confint(iv_model, level = 0.95, method = "CLR")
 # Other Models ------------------------------------------------------------
 
 
-#HRSWorkedData <- data2 %>% 
-  filter(EMP == 1)
+HRSWorkedData <- data2 %>% 
+  filter(EMP == 100)
 
-#TimeLost1 <- lm(
-  #TimeLost ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCost +
-    #Education + ParentAge + WorkFromHome + Race + Income +
-    #KidsUnder5,
-  #data2, weights = Weight
-#)
-#summary(TimeLost1)
+TimeLost1 <- lm(
+  TimeLost ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCost +
+    Education + ParentAge + WorkFromHome + Race + Income +
+    KidsUnder5,
+  data2, weights = Weight
+)
+summary(TimeLost1)
 
 
-#HRSWorked1 <- lm(
-  #HRSWorked ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCost +
-    #Education + ParentAge + WorkFromHome + Race + Income +
-    #Kid2 + Kid3 + Kid4 + Kid5 + Kid6,
-  #HRSWorkedData, weights = Weight
-#)
-#summary(EMP1)
+
+HRSWorked1 <- lm(
+  HRSWorked ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCost +
+    Education + ParentAge + WorkFromHome + Race + Income + KidsUnder5,
+  HRSWorkedData, weights = Weight
+)
+summary(EMP1)
 
