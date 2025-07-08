@@ -233,6 +233,10 @@ data2 <- data %>%
   filter(Weight != 0) %>% 
   mutate(EMP = EMP * 100)
 
+VAData <- data2 %>% 
+  filter(State == 51)
+write.csv(VAData,"../Childcare Project/Data/17-20VASIPPData.csv")
+
 
 
 # VA Dataset --------------------------------------------------------------
