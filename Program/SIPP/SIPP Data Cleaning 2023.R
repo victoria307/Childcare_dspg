@@ -1,4 +1,3 @@
-
 # File Overview -----------------------------------------------------------
 
 #This code will 
@@ -28,44 +27,12 @@ library(httr)
 library(jsonlite)
 library(tidycensus)
 
-# API ---------------------------------------------------------------------
-
-#Get your own API Key at https://www.census.gov/data/developers.html
-# Replace key
-api_key <- "cfd736f1fb3d1423e9518483a9d58aff08e22403"
-vars <- c("SSUID","SHHADID","PNUM","MONTHCODE","SPANEL","WPFINWGT", "EEDUC","TAGE","ESEX", "ERACE", "EMS", "RFAMKIND", "TEHC_METRO", "TEHC_REGION","EOTHR", "THTOTINC",
-          "EPAR", "EPAYHELP","ETIMELOST", "ETIMELOST_TP", "EWHOPAID1", "ELIST", "TWKHRS1", "TWKHRS2", "TWKHRS3", "TWKHRS4",
-          "TWKHRS5", "TMWKHRS", "EJB1_PVWKTR9", 'TCBYR_1', 'TCBYR_2', 'TCBYR_3', 'TCBYR_4', 'TCBYR_5', 'TCBYR_6', "EJB1_SCRNR")
-
-# Define endpoint and parameters
-url <- "https://api.census.gov/data/2023/sipp"
-params <- list(
-  get = paste(vars, collapse = ","),  # Variable to retrieve
-  key = api_key
-)
-
-# Make the GET request
-res <- GET(url, query = params)
-
-# Parse JSON content
-raw_data <- fromJSON(content(res, "text"))
-
-# Convert to a data frame and assign column names
-data <- as.data.frame(raw_data[-1, ], stringsAsFactors = FALSE)
-colnames(data) <- raw_data[1, ]
-data[] <- lapply(data, function(x) {
-  if (all(is.na(as.numeric(as.character(x)))) & any(!is.na(x))) x else as.numeric(as.character(x))
-})
 
 
-# Alternative to API (Will Cause Error if File not Downloaded) ---------------------------------------------------------
-
-#If API does not work
 #Download the data from this google drive link https://drive.google.com/file/d/1bC0NgqXxP0sTyHe3jC7cAqeDn_LJrOOC/view?usp=drive_link
 # Put this data in the Data folder of the git
 #Pulling the Data
-extracted_data <- unzip("Data/pu2023_csv.zip", "pu2023.csv")
-
+extracted_data <- unzip("Data/SIPPDataset2023.zip", "pu2023.csv")
 
 #Getting all useful variables
 pu <- fread(extracted_data, sep = "|", select = c(
@@ -91,29 +58,33 @@ pu <- fread(extracted_data, sep = "|", select = c(
   #Child Variables
   'TCBYR_1', 'TCBYR_2', 'TCBYR_3', 'TCBYR_4', 'TCBYR_5', 'TCBYR_6',
   # Any number after is suppressed
-  "SHHADID", "MONTHCODE", "PNUM", "SSUID"
+  "SHHADID", "MONTHCODE", "PNUM", "SSUID", "WPFINWGT", "TST_INTV"
   
 ))
 
 #Choosing Variables needed for Model
+vars <- c("SSUID","SHHADID","PNUM","MONTHCODE","SPANEL","WPFINWGT", "EEDUC","TAGE","ESEX", "ERACE", "EMS", "RFAMKIND", "TEHC_METRO", "TEHC_REGION","EOTHR", "THTOTINC",
+          "EPAR", "EPAYHELP","ETIMELOST", "ETIMELOST_TP", "EWHOPAID1", "ELIST", "TWKHRS1", "TWKHRS2", "TWKHRS3", "TWKHRS4",
+          "TWKHRS5", "TMWKHRS", "EJB1_PVWKTR9", 'TCBYR_1', 'TCBYR_2', 'TCBYR_3', 'TCBYR_4', 'TCBYR_5', 'TCBYR_6', "EJB1_SCRNR", "TST_INTV")
 data <- pu %>% 
   select(all_of(vars))
 
 
-
-
-
-# Data Cleaning -----------------------------------------------------------
-
-
-## Filtering --------------------------------------------------------------
-#Filtering for working age adults 
 data <- data %>% 
   filter(TAGE >= 18) %>% 
   filter(TAGE <= 67) 
 
-
-
+## Identification Variables
+#Household ID
+data <- data %>% 
+  mutate(HouseholdID = SSUID,
+         PersonalNumber = PNUM,
+         PID = paste(SSUID, PNUM, sep = ""),
+         Month = MONTHCODE,
+         Year = SPANEL,
+         TimeID = paste(Month, Year, sep = ""),
+         Weight = WPFINWGT,
+         State = TST_INTV) 
 ## Outcome Variables ----
 
 #Harmonizing Hours lost into standard unit (hours)
@@ -121,7 +92,6 @@ data <- data %>%
 #1: Hours 
 #2: Days 
 #3: Weeks
-
 data <- data %>%
   mutate(TimeLost = case_when(
     ETIMELOST_TP == 1 ~ ETIMELOST * 1,
@@ -138,29 +108,26 @@ data <- data %>%
   mutate(EMP = if_else(EJB1_SCRNR == 1,1,0))
 
 #Hours Worked
-unique(data$TMWKHRS)
-data <- data %>%
-  mutate(
-    HRSWorked = replace_na(TMWKHRS, 0),
-    HRSWorked = case_when(
-      HRSWorked == -999 ~ 0,
-      TRUE ~ HRSWorked
-    )
-  )
+data <- data %>% 
+  mutate(HRSWorked = TMWKHRS) %>% 
+  mutate(HRSWorked = replace_na(HRSWorked,0)) 
 
 
 ## Child Variables -------------------------------------------
 
-#Creating Indicator Variables for kids under the age of 13
+#Creating Indicator Variables for kids under the age of 5
 data <- data %>% 
   mutate(
-    Kid1 = case_when(SPANEL - TCBYR_1 <= 13 & SPANEL - TCBYR_1 >= 0 ~ 1, TRUE ~ 0),
-    Kid2 = case_when(SPANEL - TCBYR_2 <= 13 & SPANEL - TCBYR_2 >= 0 ~ 1, TRUE ~ 0),
-    Kid3 = case_when(SPANEL - TCBYR_3 <= 13 & SPANEL - TCBYR_3 >= 0 ~ 1, TRUE ~ 0),
-    Kid4 = case_when(SPANEL - TCBYR_4 <= 13 & SPANEL - TCBYR_4 >= 0 ~ 1, TRUE ~ 0),
-    Kid5 = case_when(SPANEL - TCBYR_5 <= 13 & SPANEL - TCBYR_5 >= 0 ~ 1, TRUE ~ 0),
-    Kid6 = case_when(SPANEL - TCBYR_6 <= 13 & SPANEL - TCBYR_6 >= 0 ~ 1, TRUE ~ 0)
+    Kid1 = case_when(SPANEL - TCBYR_1 <= 5 & SPANEL - TCBYR_1 >= 0 ~ 1, TRUE ~ 0),
+    Kid2 = case_when(SPANEL - TCBYR_2 <= 5 & SPANEL - TCBYR_2 >= 0 ~ 1, TRUE ~ 0),
+    Kid3 = case_when(SPANEL - TCBYR_3 <= 5 & SPANEL - TCBYR_3 >= 0 ~ 1, TRUE ~ 0),
+    Kid4 = case_when(SPANEL - TCBYR_4 <= 5 & SPANEL - TCBYR_4 >= 0 ~ 1, TRUE ~ 0),
+    Kid5 = case_when(SPANEL - TCBYR_5 <= 5 & SPANEL - TCBYR_5 >= 0 ~ 1, TRUE ~ 0),
+    Kid6 = case_when(SPANEL - TCBYR_6 <= 5 & SPANEL - TCBYR_6 >= 0 ~ 1, TRUE ~ 0)
   )
+data <- data %>%
+  mutate(KidsUnder5 = factor(rowSums(select(., Kid1:Kid5), na.rm = TRUE)))
+
 
 #Creating Age of Child Buckets
 # 1 = infant (0 - 1)
@@ -169,45 +136,44 @@ data <- data %>%
 # 4 = School age (6 - 13)
 # 5 = Too Old (14+)
 # -1 = Child does not exist
-# Dataset uses -999 for NA Birth Years
 data <- data %>%
   mutate(age1 = if_else(is.na(TCBYR_1), -1, SPANEL - TCBYR_1),
          age_group1 = cut(
            age1,
-           breaks = c(-Inf, -1, 1, 3, 5, 13, 1000, Inf),
-           labels = c("No Child", "Infant", "Toddler", "Preschool", "School Age", "Past Subsidy","No Child"),
+           breaks = c(-Inf, -1, 1, 3, 5, 13, Inf),
+           labels = c("No Child", "Infant", "Toddler", "Preschool", "School Age", "Past Subsidy"),
            right = TRUE
          ),
          age2 = if_else(is.na(TCBYR_2), -1, SPANEL - TCBYR_2),
          age_group2 = cut(
            age2,
-           breaks = c(-Inf, -1, 1, 3, 5, 13, 1000, Inf),
-           labels = c("No Child", "Infant", "Toddler", "Preschool", "School Age", "Past Subsidy","No Child"),
+           breaks = c(-Inf, -1, 1, 3, 5, 13, Inf),
+           labels = c("No Child", "Infant", "Toddler", "Preschool", "School Age", "Past Subsidy"),
            right = TRUE
          ),
          age3 = if_else(is.na(TCBYR_3), -1, SPANEL - TCBYR_3),
          age_group3 = cut(
            age3,
-           breaks = c(-Inf, -1, 1, 3, 5, 13, 1000, Inf),
-           labels = c("No Child", "Infant", "Toddler", "Preschool", "School Age", "Past Subsidy","No Child"),
+           breaks = c(-Inf, -1, 1, 3, 5, 13, Inf),
+           labels = c("No Child", "Infant", "Toddler", "Preschool", "School Age", "Past Subsidy"),
            right = TRUE),
          age4 = if_else(is.na(TCBYR_4), -1, SPANEL - TCBYR_4),
          age_group4 = cut(
            age4,
-           breaks = c(-Inf, -1, 1, 3, 5, 13, 1000, Inf),
-           labels = c("No Child", "Infant", "Toddler", "Preschool", "School Age", "Past Subsidy","No Child"),
+           breaks = c(-Inf, -1, 1, 3, 5, 13, Inf),
+           labels = c("No Child", "Infant", "Toddler", "Preschool", "School Age", "Past Subsidy"),
            right = TRUE),
          age5 = if_else(is.na(TCBYR_5), -1, SPANEL - TCBYR_5),
          age_group5 = cut(
            age5,
-           breaks = c(-Inf, -1, 1, 3, 5, 13, 1000, Inf),
-           labels = c("No Child", "Infant", "Toddler", "Preschool", "School Age", "Past Subsidy","No Child"),
+           breaks = c(-Inf, -1, 1, 3, 5, 13, Inf),
+           labels = c("No Child", "Infant", "Toddler", "Preschool", "School Age", "Past Subsidy"),
            right = TRUE),
          age6 = if_else(is.na(TCBYR_6), -1, SPANEL - TCBYR_6),
          age_group6 = cut(
            age6,
-           breaks = c(-Inf, -1, 1, 3, 5, 13, 1000, Inf),
-           labels = c("No Child", "Infant", "Toddler", "Preschool", "School Age", "Past Subsidy","No Child"),
+           breaks = c(-Inf, -1, 1, 3, 5, 13, Inf),
+           labels = c("No Child", "Infant", "Toddler", "Preschool", "School Age", "Past Subsidy"),
            right = TRUE)
   )
 
@@ -244,23 +210,15 @@ data <- data %>%
                        levels = c(1,2,3,4),
                        labels = c("White", "Black", "Asian", "Residual")))
 
+#Child Care Cost (in 100s) Does not Exist in 2024 dataset
+#data <- data %>% 
+  #mutate(ChildCareCostper100 = replace_na(TDEPNDNTEXP,0)/100)
 
 #Income
 summary(data$THTOTINC)
 sum(is.na(data$THTOTINC))
 data <- data %>% 
   mutate(Income = THTOTINC)
-
-#Household ID
-data <- data %>% 
-  mutate(HouseholdID = SHHADID,
-         PersonalNumber = PNUM,
-         PID = paste(SHHADID, PNUM, sep = ""),
-         Month = MONTHCODE,
-         Year = SPANEL,
-         TimeID = paste(Month, Year, sep = ""),
-         Weight = WPFINWGT) 
-
 
 
 
@@ -285,7 +243,7 @@ data <- data %>%
   mutate(SingleFamily = if_else(EMS != 1,1,0))
 
 
-#Making EWHOPAID into a factor
+#Making EPAYHELP into a factor
 data <- data %>% 
   mutate(WelfareorSS = if_else(EWHOPAID1 == 1,1,0)) %>% 
   mutate(WelfareorSS = replace_na(WelfareorSS,0))
@@ -297,13 +255,18 @@ data <- data %>%
 summary(data$WorkFromHome)
 
 
+# Making Final Data -------------------------------------------------------
+
+
 data2 <- data %>% 
-  select(37:ncol(data)) %>% 
-  filter(Kid1 == 1)
+  select(38:ncol(data)) %>% 
+  filter(KidsUnder5 != 0)  %>% 
+  filter(Weight != 0) %>% 
+  mutate(EMP = EMP * 100)
 
+write.csv(data2,"Childcare Project/Data/20-23SIPPData.csv")
 
-write.csv(data2,"Data/SIPPcleaneddata.csv")
+VAData <- data2 %>% 
+  filter(State == 51)
 
-
-
-
+write.csv(VAData,"Childcare Project/Data/20-23VASIPPData.csv")

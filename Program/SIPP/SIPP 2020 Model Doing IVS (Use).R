@@ -7,17 +7,10 @@ rm(list = ls())
 
 
 #Packages needed (install.packages if these lines do not work)
-library("data.table")
-library("bit64")
 library("dplyr")
 library("tidyr")
-library("forcats")
 library(stringr)
-library(httr)
-library(jsonlite)
-library(tidycensus)
 library(fixest)
-library(stargazer)
 library(modelsummary)
 library(car)
 library(AER)
@@ -27,6 +20,9 @@ library(ggplot2)
 #This file is in my own data foler
 setwd("C:/Users/joshu/Desktop/DSPG/Data")
 extracted_data <- unzip("pu2020_csv.zip", "pu2020.csv")
+
+
+### Data Cleaning -----------------------------------------------------------
 
 
 #Getting all useful variables
@@ -276,7 +272,7 @@ Subsidy <- data2 %>%
 EMP1 <- lm(
   EMP ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCostper100 +
     ChildCareCostper100:NonMetro + ChildCareCostper100:Female+
-    Education + ParentAge + WorkFromHome + Race + Income + KidsUnder5,
+    Education + ParentAge + WorkFromHome + Race + Income + factor(KidsUnder5),
   data2, weights = Weight
 )
 summary(EMP1)
@@ -285,7 +281,7 @@ summary(EMP1)
 EMP1 <- feols(
   EMP ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCostper100 +
     NonMetro*ChildCareCostper100 + Female*ChildCareCostper100+
-    Education + ParentAge  + Race + KidsUnder5|HouseholdID + TimeID,
+    Education + ParentAge  + Race + factor(KidsUnder5)|HouseholdID + TimeID,
   data2, weights = ~Weight
 )
 summary(EMP1)
