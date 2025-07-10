@@ -8,7 +8,7 @@ library(fixest)
 library(modelsummary)
 
 #Getting Data
-data <- read.csv("Childcare Project/Data/20-23VASIPPData.csv")
+data <- read.csv("../Childcare Project/Data/SIPP Output/20-23VASIPPData.csv")
 
 #Creating Household Size variable
 data <- data %>%

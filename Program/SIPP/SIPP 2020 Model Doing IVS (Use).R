@@ -1,9 +1,23 @@
 #Notes
 #looking at changes to Age Indicator
 
+
+
+# Final Results -----------------------------------------------------------
+#Models I Like
+summary(TimeLost) #OLS Hours Lost
+summary(HrsWorkedFE) #FE HRS Worked
+summary(HrsWorked1) #OLS HRs Worked
+summary(EMP2) #FE Employment
+chart # Density Chart for the FE employment Model
+summary(IVEMP) #Final IV Model for Employment
+
+
+
 #Clearing the workspace
 cat("\014")
 rm(list = ls())
+
 
 
 #Packages needed (install.packages if these lines do not work)
@@ -266,8 +280,52 @@ Subsidy <- data2 %>%
 
 
 
-# EMP Model ---------------------------------------------------------------
 
+#Time Lost Model
+#### Like This One #####
+TimeLost <- lm(
+  TimeLost ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCostper100 +
+    ChildCareCostper100:NonMetro + ChildCareCostper100:Female+
+    Education + ParentAge + WorkFromHome + Race + Income + factor(KidsUnder5),
+  data2, weights = Weight
+)
+summary(TimeLost)
+
+#Loses all Significane
+TimeLostFE <- feols(
+  TimeLost~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCostper100 +
+    NonMetro*ChildCareCostper100 + Female*ChildCareCostper100+
+    Education + ParentAge  + Race + factor(KidsUnder5)|HouseholdID + Month + Year + Month:Year,
+  data2, weights = ~Weight
+)
+summary(TimeLostFE)
+
+#HRS Worked Model
+HRSWorkedData <- data2 %>% 
+  group_by(PID) %>% 
+  filter(all(HRSWorked != 0)) %>% 
+  ungroup()
+
+#Decent Significance
+HrsWorked1 <- lm(
+  HRSWorked ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCostper100 +
+    ChildCareCostper100:NonMetro + ChildCareCostper100:Female+
+    Education + ParentAge + WorkFromHome + Race + Income + factor(KidsUnder5),
+  HRSWorkedData, weights = Weight
+)
+summary(HrsWorked1)
+
+#Interesting: More expensive childcare, fewer hours worked
+# Interesting because we filtered out non workers
+# Childcare so expensive that poeple are unable to work
+HrsWorkedFE <- feols(
+  HRSWorked~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCostper100 +
+    NonMetro*ChildCareCostper100 + Female*ChildCareCostper100+
+    Education + ParentAge  + Race + factor(KidsUnder5)|HouseholdID + Month + Year + Month:Year,
+  HRSWorkedData, weights = ~Weight)
+
+summary(HrsWorkedFE)
+# EMP Model ---------------------------------------------------------------
 
 EMP1 <- lm(
   EMP ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCostper100 +
@@ -277,17 +335,17 @@ EMP1 <- lm(
 )
 summary(EMP1)
 
-
-EMP1 <- feols(
+#Like This Model, Nice Results
+EMP2 <- feols(
   EMP ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCostper100 +
     NonMetro*ChildCareCostper100 + Female*ChildCareCostper100+
-    Education + ParentAge  + Race + factor(KidsUnder5)|HouseholdID + TimeID,
+    Education + ParentAge  + Race + factor(KidsUnder5)|HouseholdID + Month + Year + Month:Year,
   data2, weights = ~Weight
 )
-summary(EMP1)
+summary(EMP2)
 
 #Showing Denisty Chart of Child Care Costs
-data2 %>%
+chart <- data2 %>%
   filter(ChildCareCostper100 > 0) %>%
   mutate(ChildCareCost = ChildCareCostper100 * 100) %>%
   ggplot(aes(x = ChildCareCost)) +
@@ -360,6 +418,7 @@ summary(IVEMP)
 
 
 # IV Fixed Effects EMP Model ------------------------------------------------------------
+#This Does not look like it will work
 #This Model Is Different from the 2020 SIPP Data Clearning and other files BC
 # New Factor variable for number of kids under AGe
 # Messing around the age to count a child
@@ -367,23 +426,20 @@ summary(IVEMP)
 # Check F stat for strength of IV, Looking for above 10
 # Problem: All the IVS are super weak
 FEIVCCCost <- feols(
-  ChildCareCost ~ NonMetro + Female + SingleFamily + WelfareorSS +
-    Education + ParentAge + Race + KidsUnder5|HouseholdID + TimeID,
+  ChildCareCostper100 ~ NonMetro + Female + SingleFamily + WelfareorSS +
+    Education + ParentAge + Race + factor(KidsUnder5)|HouseholdID + TimeID,
   data2, weights = ~Weight
 )
 summary(IVCCCost)
-
-
-
-linearHypothesis(IVCCCost, c("WelfareorSS = 0"), test = "F")
+linearHypothesis(FEIVCCCost, c("WelfareorSS = 0"), test = "F")
 
 FEIVCOSTxFemale <- feols(
-  I(ChildCareCost * Female) ~ NonMetro + SingleFamily + WelfareorSS + 
-    WelfareorSS:Female + Education + ParentAge + Race + KidsUnder5 | HouseholdID + TimeID,
+  I(ChildCareCostper100 * Female) ~ NonMetro + SingleFamily + WelfareorSS + 
+    WelfareorSS:Female + Education + ParentAge + Race + factor(KidsUnder5) | HouseholdID + TimeID,
   data = data2,
   weights = ~Weight
 )
-linearHypothesis(IVCOSTxFemale, c("WelfareorSS = 0", "WelfareorSS:Female = 0"), test = "F")
+linearHypothesis(FEIVCOSTxFemale, c("WelfareorSS = 0", "WelfareorSS:Female = 0"), test = "F")
 
 
 
@@ -442,23 +498,4 @@ confint(iv_model, level = 0.95, method = "CLR")
 # Other Models ------------------------------------------------------------
 
 
-HRSWorkedData <- data2 %>% 
-  filter(EMP == 100)
-
-TimeLost1 <- lm(
-  TimeLost ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCost +
-    Education + ParentAge + WorkFromHome + Race + Income +
-    KidsUnder5,
-  data2, weights = Weight
-)
-summary(TimeLost1)
-
-
-
-HRSWorked1 <- lm(
-  HRSWorked ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCost +
-    Education + ParentAge + WorkFromHome + Race + Income + KidsUnder5,
-  HRSWorkedData, weights = Weight
-)
-summary(EMP1)
 
