@@ -15,7 +15,7 @@ VAdata <- read.csv("Data/VAdataparticipation.csv") %>%
          year = Year)  
   
 
-VAdata$Year <- as.integer(as.character(VAdata$Year))
+VAdata$Year <- as.integer(as.character(VAdata$year))
 VDOEdata <- read.csv("Data/VDOE/VDOEpolicydummy.csv")
 
 merged <- VDOEdata %>% 
@@ -29,12 +29,15 @@ VAdata22 <- VAdata %>%
 VAdataTS <- VAdata %>%
   filter(Year >= 2014 & Year <= 2019)
 
+write.csv(merged, "Data/VDOE/WB+VDOE.csv")
+
+
 #Modeling
 model <- lm( Total_Count ~
                MR70per + EL85LFW + NoWaitListPeriod + NoCopayPeriod+
                MFI + #median family income
                H_UNDER6_SINGLEM + #number of households under 6 with single mothers
-               #MCINFANT + MCTODDLER + MCPRESCHOOL + MFCCINFANT + MFCCTODDLER +
+               MCINFANT + MCTODDLER + MCPRESCHOOL + MFCCINFANT + MFCCTODDLER +
                MFCCPRESCHOOL + Urban + ONERACE_W + ONERACE_B +
                ONERACE_I + ONERACE_A + ONERACE_H +
                HISPANIC,

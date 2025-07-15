@@ -5,12 +5,12 @@
 
 # Final Results -----------------------------------------------------------
 #Models I Like
-summary(TimeLost) #OLS Hours Lost
-summary(HrsWorkedFE) #FE HRS Worked
-summary(HrsWorked1) #OLS HRs Worked
-summary(EMP2) #FE Employment
-chart # Density Chart for the FE employment Model
-summary(IVEMP) #Final IV Model for Employment
+#summary(TimeLost) #OLS Hours Lost
+#summary(HrsWorkedFE) #FE HRS Worked
+#summary(HrsWorked1) #OLS HRs Worked
+#summary(EMP2) #FE Employment
+#chart # Density Chart for the FE employment Model
+#summary(IVEMP) #Final IV Model for Employment
 
 
 
@@ -30,6 +30,7 @@ library(modelsummary)
 library(car)
 library(AER)
 library(ggplot2)
+library(data.table)
 
 #Can't put actual file on git bc too big
 #This file is in my own data foler
