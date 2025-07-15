@@ -29,13 +29,19 @@ VAdata22 <- VAdata %>%
 VAdataTS <- VAdata %>%
   filter(Year >= 2014 & Year <= 2019)
 
+check <- merged %>% 
+  filter(code == 3)
+check2 <- VAdata %>% 
+  filter(fips == 51003)
+
 write.csv(merged, "Data/VDOE/WB+VDOE.csv")
 
 
 #Modeling
-model <- lm( Total_Count ~
+model <- lm(Expenditures ~
                MR70per + EL85LFW + NoWaitListPeriod + NoCopayPeriod+
-               MFI + #median family income
+               MR70per:MCINFANT + EL85LFW:MCINFANT + NoWaitListPeriod:MCINFANT +
+               NoCopayPeriod:MCINFANT + #median family income
                H_UNDER6_SINGLEM + #number of households under 6 with single mothers
                MCINFANT + MCTODDLER + MCPRESCHOOL + MFCCINFANT + MFCCTODDLER +
                MFCCPRESCHOOL + Urban + ONERACE_W + ONERACE_B +
@@ -43,6 +49,8 @@ model <- lm( Total_Count ~
                HISPANIC,
              data = merged)
 summary(model)
+
+alias(model)  
 
 model2 <- lm(formula = Total_Count ~ MR70per + EL85LFW + NoWaitListPeriod + 
      NoCopayPeriod + MFI + H_UNDER6_SINGLEM + Urban + ONERACE_W + 
