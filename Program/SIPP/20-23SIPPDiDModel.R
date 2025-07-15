@@ -76,6 +76,12 @@ EMP1 <- lm(EMP ~ Subsidy + PostTreat + Subsidy:PostTreat+
                 weights = Weight)
 summary(EMP1)
 
+
+modelsummary(EMP1, 
+             stars = TRUE,
+             statistic = "p.value",
+             output = "latex")
+
 Time1 <- lm(TimeLost ~ Subsidy + PostTreat + Subsidy:PostTreat+
               NonMetro + Female + SingleFamily + 
               Education + ParentAge + factor(Race), data = data,
