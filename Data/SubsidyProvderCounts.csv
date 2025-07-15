@@ -1,0 +1,127 @@
+"","FIPS","Locality","SFY20","SFY21","SFY22","SFY23"
+"1","001","Accomack County",8,8,8,8
+"2","003","Albemarle County",35,35,35,35
+"3","005","Alleghany County",5,5,5,5
+"4","007","Amelia County",4,4,4,4
+"5","009","Amherst County",22,22,22,22
+"6","011","Appomattox County",9,9,9,9
+"7","013","Arlington County",51,51,51,51
+"8","015","Augusta County",17,17,17,17
+"9","019","Bedford County",23,23,23,23
+"10","021","Bland County",4,4,4,4
+"11","023","Botetourt County",13,13,13,13
+"12","025","Brunswick County",8,8,8,8
+"13","027","Buchanan County",1,1,1,1
+"14","029","Buckingham County",9,9,9,9
+"15","031","Campbell County",26,26,26,26
+"16","033","Caroline County",22,22,22,22
+"17","035","Carroll County",14,14,14,14
+"18","036","Charles City County",5,5,5,5
+"19","037","Charlotte County",2,2,2,2
+"20","041","Chesterfield County",102,102,102,102
+"21","043","Clarke County",5,5,5,5
+"22","045","Craig County",3,3,3,3
+"23","047","Culpeper County",43,43,43,43
+"24","049","Cumberland County",8,8,8,8
+"25","051","Dickenson County",2,2,2,2
+"26","053","Dinwiddie County",19,19,19,19
+"27","057","Essex County",9,9,9,9
+"28","059","Fairfax County",588,588,588,588
+"29","061","Fauquier County",34,34,34,34
+"30","063","Floyd County",11,11,11,11
+"31","065","Fluvanna County",14,14,14,14
+"32","067","Franklin County",25,25,25,25
+"33","069","Frederick County",14,14,14,14
+"34","071","Giles County",10,10,10,10
+"35","073","Gloucester County",12,12,12,12
+"36","075","Goochland County",9,9,9,9
+"37","077","Grayson County",7,7,7,7
+"38","079","Greene County",7,7,7,7
+"39","081","Greensville County",10,10,10,10
+"40","083","Halifax County",2,2,2,2
+"41","085","Hanover County",39,39,39,39
+"42","087","Henrico County",135,135,135,135
+"43","089","Henry County",17,17,17,17
+"44","091","Highland County",1,1,1,1
+"45","093","Isle of Wight County",15,15,15,15
+"46","095","James City County",16,16,16,16
+"47","097","King and Queen County",6,6,6,6
+"48","099","King George County",18,18,18,18
+"49","101","King William County",15,15,15,15
+"50","103","Lancaster County",3,3,3,3
+"51","105","Lee County",2,2,2,2
+"52","107","Loudoun County",69,69,69,69
+"53","109","Louisa County",19,19,19,19
+"54","111","Lunenburg County",2,2,2,2
+"55","113","Madison County",10,10,10,10
+"56","115","Mathews County",3,3,3,3
+"57","117","Mecklenburg County",9,9,9,9
+"58","119","Middlesex County",8,8,8,8
+"59","121","Montgomery County",36,36,36,36
+"60","125","Nelson County",8,8,8,8
+"61","127","New Kent County",14,14,14,14
+"62","131","Northampton County",10,10,10,10
+"63","133","Northumberland County",4,4,4,4
+"64","135","Nottoway County",4,4,4,4
+"65","137","Orange County",34,34,34,34
+"66","139","Page County",4,4,4,4
+"67","141","Patrick County",1,1,1,1
+"68","143","Pittsylvania County",18,18,18,18
+"69","145","Powhatan County",7,7,7,7
+"70","147","Prince Edward County",4,4,4,4
+"71","149","Prince George County",26,26,26,26
+"72","153","Prince William County",192,192,192,192
+"73","155","Pulaski County",8,8,8,8
+"74","157","Rappahannock County",4,4,4,4
+"75","159","Richmond County",4,4,4,4
+"76","161","Roanoke County",51,51,51,51
+"77","163","Rockbridge County",5,5,5,5
+"78","165","Rockingham County",17,17,17,17
+"79","167","Russell County",5,5,5,5
+"80","169","Scott County",1,1,1,1
+"81","171","Shenandoah County",20,20,20,20
+"82","173","Smyth County",7,7,7,7
+"83","175","Southampton County",10,10,10,10
+"84","177","Spotsylvania County",38,38,38,38
+"85","179","Stafford County",46,46,46,46
+"86","181","Surry County",6,6,6,6
+"87","183","Sussex County",5,5,5,5
+"88","185","Tazewell County",8,8,8,8
+"89","187","Warren County",10,10,10,10
+"90","191","Washington County",11,11,11,11
+"91","193","Westmoreland County",11,11,11,11
+"92","195","Wise County",6,6,6,6
+"93","197","Wythe County",7,7,7,7
+"94","199","York County",35,35,35,35
+"95","510","Alexandria City",139,139,139,139
+"96","520","Bristol City",10,10,10,10
+"97","530","Buena Vista City",5,5,5,5
+"98","540","Charlottesville City",27,27,27,27
+"99","550","Chesapeake City",180,180,180,180
+"100","570","Colonial Heights City",21,21,21,21
+"101","580","Covington City",4,4,4,4
+"102","590","Danville City",18,18,18,18
+"103","620","Franklin City",14,14,14,14
+"104","630","Fredericksburg City",33,33,33,33
+"105","640","Galax City",3,3,3,3
+"106","650","Hampton City",85,85,85,85
+"107","660","Harrisonburg City",14,14,14,14
+"108","670","Hopewell City",30,30,30,30
+"109","678","Lexington City",3,3,3,3
+"110","680","Lynchburg City",35,35,35,35
+"111","683","Manassas City",33,33,33,33
+"112","685","Manassas Park City",14,14,14,14
+"113","690","Martinsville City",15,15,15,15
+"114","700","Newport News City",108,108,108,108
+"115","710","Norfolk City",157,157,157,157
+"116","730","Petersburg City",43,43,43,43
+"117","740","Portsmouth City",92,92,92,92
+"118","750","Radford City",17,17,17,17
+"119","760","Richmond City",123,123,123,123
+"120","770","Roanoke City",59,59,59,59
+"121","790","Staunton City",13,13,13,13
+"122","800","Suffolk City",57,57,57,57
+"123","810","Virginia Beach City",124,124,124,124
+"124","820","Waynesboro City",13,13,13,13
+"125","830","Williamsburg City",9,9,9,9
+"126","840","Winchester City",9,9,9,9

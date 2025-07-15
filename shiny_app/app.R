@@ -12,24 +12,28 @@ library(timevis)
 # VA Data --------------------------------------------------------------------
 
 # Import data
+<<<<<<< HEAD:childcare_analysis_app.R
 labor_data <- read_excel("Women's Bureau Data Work/WB Data/Source/labor_data.xlsx")
+=======
+#labor_data <- read_excel("Women's Bureau Data Work/labor_data.xlsx")
+>>>>>>> 6746d3230e54c21e762def221d3db875e60a79ab:shiny_app/app.R
 
 # Create VA data
-VA_data <- labor_data %>%
-  filter(STATE_NAME == "Virginia")
+#VA_data <- labor_data %>%
+  #filter(STATE_NAME == "Virginia")
 
 # Prepare VA counties spatial data
-va_counties <- counties(state = "VA", cb = TRUE, class = "sf") %>%
-  mutate(FIPS = GEOID) %>%
-  st_transform(crs = 4326)
+#va_counties <- counties(state = "VA", cb = TRUE, class = "sf") %>%
+ # mutate(FIPS = GEOID) %>%
+  #st_transform(crs = 4326)
 
 # Format FIPS codes consistently
-VA_data <- VA_data %>%
-  mutate(COUNTY_FIPS_CODE = str_pad(as.character(COUNTY_FIPS_CODE), width = 5, pad = "0"))
+#VA_data <- VA_data %>%
+  #mutate(COUNTY_FIPS_CODE = str_pad(as.character(COUNTY_FIPS_CODE), width = 5, pad = "0"))
 
 # Join spatial and attribute data
-map_data_all <- va_counties %>%
-  left_join(VA_data, by = c("GEOID" = "COUNTY_FIPS_CODE"))
+#map_data_all <- va_counties %>%
+  #left_join(VA_data, by = c("GEOID" = "COUNTY_FIPS_CODE"))
 
 #Timeline Data ----------------------------------------------------------------
 policy_data <- data.frame(
@@ -200,7 +204,7 @@ tabPanel("Timeline",
                  selectInput("provider", "Select Provider Type:", choices = c("Center Care"="C", "Home Care"="FCC"))
                ),
                mainPanel(
-                 leafletOutput("childcareMap", height = "600px")
+                 #leafletOutput("childcareMap", height = "600px")
                )
              )
            )
@@ -224,15 +228,16 @@ tabPanel("Timeline",
 # Server ------------------------------------------------------------------
 #Childcare Map
 server <- function(input, output, session) {
-  filtered_data <- reactive({
-    cost_col <- paste0(input$percentile, input$provider, input$age_group)
-    df <- map_data_all %>%
-      filter(STUDYYEAR == input$STUDYYEAR) %>%
-      mutate(cost_pct_income = (.data[[cost_col]] * 52) / MFI) %>%
-      filter(!is.na(cost_pct_income), is.finite(cost_pct_income), cost_pct_income > 0)
-    df
-  })
+  #filtered_data <- reactive({
+   # cost_col <- paste0(input$percentile, input$provider, input$age_group)
+   # df <- map_data_all %>%
+    #  filter(STUDYYEAR == input$STUDYYEAR) %>%
+     # mutate(cost_pct_income = (.data[[cost_col]] * 52) / MFI) %>%
+     # filter(!is.na(cost_pct_income), is.finite(cost_pct_income), cost_pct_income > 0)
+   # df
+ # })
   
+<<<<<<< HEAD:childcare_analysis_app.R
   output$childcareMap <- renderLeaflet({
     df <- filtered_data()
     pal <- colorNumeric("viridis", df$cost_pct_income, na.color = "gray90")
@@ -284,6 +289,32 @@ output$policyDetails <- renderUI({
     h5("📌 Click a timeline event to view its summary and document.")
   }
 })
+=======
+  #output$childcareMap <- renderLeaflet({
+   # df <- filtered_data()
+   # pal <- colorNumeric("viridis", df$cost_pct_income, na.color = "gray90")
+    #leaflet(df) %>%
+     # addProviderTiles(providers$CartoDB.Positron) %>%
+     # addPolygons(
+     #   fillColor = ~pal(cost_pct_income),
+      #  weight = 1,
+      #  color = "white",
+      #  fillOpacity = 0.7,
+       # label = ~paste0(NAME, ": ", scales::percent(cost_pct_income, accuracy = 1)),
+       # labelOptions = labelOptions(
+        #  style = list("font-weight" = "normal", padding = "3px 8px"),
+        #  textsize = "15px",
+        #  direction = "auto"
+      #  )
+     # ) %>%
+     # addLegend(
+      #  pal = pal,
+      #  values = df$cost_pct_income,
+      #  title = "Cost as % of Income",
+      #  labFormat = labelFormat(suffix = "%", transform = function(x) 100 * x)
+     # )
+ # })
+>>>>>>> 6746d3230e54c21e762def221d3db875e60a79ab:shiny_app/app.R
 }
 observe({  print(input$timeline_selected)
 })

@@ -1,0 +1,12 @@
+name: ChildcareAnalysis
+title: ChildcareAnalysis
+username: gmvt
+account: gmvt
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14997697
+bundleId: 10525569
+url: https://gmvt.shinyapps.io/ChildcareAnalysis/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

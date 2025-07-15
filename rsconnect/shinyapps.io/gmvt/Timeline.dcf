@@ -1,0 +1,10 @@
+name: Timeline
+title: Timeline
+username: gmvt
+account: gmvt
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14983383
+bundleId:
+url: https://gmvt.shinyapps.io/Timeline/
+version: 1

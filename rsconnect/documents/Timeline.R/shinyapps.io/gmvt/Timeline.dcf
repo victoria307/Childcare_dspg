@@ -1,0 +1,13 @@
+name: Timeline
+title: Timeline
+username: gmvt
+account: gmvt
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14983383
+bundleId: 10510604
+url: https://gmvt.shinyapps.io/Timeline/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|Analysis_Script.R|Data/Kaggle_Data/childcare_costs.csv|Data/Kaggle_Data/counties.csv|Data/Kaggle_Data/Kaggle Variable Description.xlsx|Data/Kaggle_Data/placeholder|Data/placeholder|example for git.Rmd|JoshuaYoo|README.md|VA_data_examination.R|Yin Kyay|Yin Kyay Wai|Women's Bureau Data Work

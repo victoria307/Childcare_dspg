@@ -47,7 +47,7 @@ summary(TimeLost1)
 
 EMP1 <- lm(
   EMP ~ NonMetro + Female + SingleFamily + WelfareorSS +
-    Education + ParentAge + Race + Income + factor(Kids),
+    Education + ParentAge + Race + Income + factor(KidsUnder5),
   data, weights = Weight
 )
 summary(EMP1)
