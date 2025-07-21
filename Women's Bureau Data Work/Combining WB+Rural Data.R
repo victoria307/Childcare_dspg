@@ -10,8 +10,8 @@ library(dplyr)
 library(fixest)
 
 EMPdata <- read.csv("Data/VA_data.csv")
-RuralData <- read_xlsx("Data/Census County Classification.xlsx")
-VAChar <- read.csv("Data/VACountyCharacteristics.csv")
+RuralData <- read_xlsx("Data/Census Data/Census County Classification.xlsx")
+VAChar <- read.csv("Data/Census Data/VACountyCharacteristics.csv")
 
 unique(EMPdata$STUDYYEAR)
 
@@ -66,10 +66,6 @@ VAChar <- VAChar %>%
            YEAR == 5 ~ 2023
          ))
 
-
-RuralData <- RuralData %>% 
-  mutate(COUNTY_FIPS_CODE = as.numeric(paste0(STATE,COUNTY))) %>% 
-  filter(STATE == 51)
 
 Merged <- left_join(EMPdata, RuralData, by = "COUNTY_FIPS_CODE")
 ModelData <- left_join(WBNameChange, RuralData, by = "COUNTY_FIPS_CODE")
