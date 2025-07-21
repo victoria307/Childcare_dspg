@@ -245,6 +245,11 @@ data2 <- data %>%
   filter(Weight != 0) %>% 
   mutate(EMP = EMP * 100)
 
+dataIV <- data2 %>% 
+  group_by(PID) %>% 
+  filter(!any(Income > 9000)) %>% 
+  ungroup()
+
 VAData <- data2 %>% 
   filter(State == 51)
 write.csv(VAData,"../Childcare Project/Data/17-20VASIPPData.csv")
@@ -319,7 +324,7 @@ summary(HrsWorked1)
 
 #Interesting: More expensive childcare, fewer hours worked
 # Interesting because we filtered out non workers
-# Childcare so expensive that poeple are unable to work
+# Childcare so expensive that people are unable to work
 HrsWorkedFE <- feols(
   HRSWorked~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCareCostper100 +
     NonMetro*ChildCareCostper100 + Female*ChildCareCostper100+
@@ -375,16 +380,18 @@ modelsummary(EMP1,
 IVCCCost <- lm(
   ChildCareCostper100 ~ NonMetro + Female + SingleFamily + WelfareorSS +
     Education + ParentAge + Race + KidsUnder5,
-  data2, weights = Weight
+  dataIV, weights = Weight
 )
 summary(IVCCCost)
 linearHypothesis(IVCCCost, c("WelfareorSS = 0"), test = "F")
 
 
+
+
 IVCOSTxFemale <- lm(
   I(ChildCareCostper100 * Female) ~ NonMetro + SingleFamily + WelfareorSS + 
     WelfareorSS:Female + Education + ParentAge + Race + KidsUnder5,
-  data = data2,
+  data = dataIV,
   weights = Weight
 )
 summary(IVCOSTxFemale)
@@ -394,13 +401,13 @@ linearHypothesis(IVCOSTxFemale, c("WelfareorSS = 0", "WelfareorSS:Female = 0"), 
 IVCOSTxNonMetro <- lm(
   I(ChildCareCostper100 * NonMetro) ~  WelfareorSS:NonMetro+ Female + SingleFamily + WelfareorSS +
     Education + ParentAge + Race + KidsUnder5,
-  data2, weights = Weight
+  dataIV, weights = Weight
 )
 summary(IVCOSTxNonMetro)
 linearHypothesis(IVCOSTxNonMetro, c("WelfareorSS = 0", "WelfareorSS:NonMetro = 0"), test = "F")
 
 
-IVData <- data2 %>% 
+IVData <- dataIV %>% 
   mutate(PredictedCost = predict(IVCCCost),
          PredictedFemale = predict(IVCOSTxFemale),
          PredictedNonMetro = predict(IVCOSTxNonMetro))
@@ -412,6 +419,35 @@ IVEMP <- lm(
     Education + ParentAge + Race + KidsUnder5,
   IVData, weights = Weight
 )
+summary(IVEMP)
+
+IVEMP2 <- ivreg(
+  EMP ~ NonMetro + Female + SingleFamily
+  + ChildCareCostper100 + ChildCareCostper100:NonMetro + ChildCareCostper100:Female 
+  + Education + ParentAge + Race + KidsUnder5 | . -ChildCareCostper100 -ChildCareCostper100:NonMetro 
+  -ChildCareCostper100:Female  + WelfareorSS
+  + WelfareorSS:NonMetro + WelfareorSS:Female,
+  data = dataIV
+)
+summary(IVEMP2,diagnostics = TRUE)
+
+IVEMP3 <- ivreg(
+  EMP ~ NonMetro + Female + SingleFamily
+  + ChildCareCostper100 
+  + Education + ParentAge + Race + KidsUnder5 | . -ChildCareCostper100  + WelfareorSS,
+  data = dataIV)
+summary(IVEMP3, diagnostics = TRUE)
+
+IVEMP4 <- ivreg(
+  EMP ~ NonMetro + Female + SingleFamily
+  + ChildCareCostper100 + ChildCareCostper100:NonMetro + ChildCareCostper100:Female 
+  + Education + ParentAge + Race + KidsUnder5 | . -ChildCareCostper100 -ChildCareCostper100:NonMetro 
+  -ChildCareCostper100:Female  + WelfareorSS,
+  data = dataIV
+)
+summary(IVEMP4,diagnostics = TRUE)
+
+
 modelsummary(IVEMP, 
              stars = TRUE,
              statistic = "p.value",

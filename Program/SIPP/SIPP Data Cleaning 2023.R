@@ -24,14 +24,16 @@ library("tidyr")
 library("forcats")
 library(stringr)
 library(httr)
-library(jsonlite)
-library(tidycensus)
+
 
 
 
 #Download the data from this google drive link https://drive.google.com/file/d/1bC0NgqXxP0sTyHe3jC7cAqeDn_LJrOOC/view?usp=drive_link
+#If this does not work https://www.census.gov/programs-surveys/sipp/data/datasets/2023-data/2023.html
+#Download the Pipe Delimited text data
 # Put this data in the Data folder of the git
 #Pulling the Data
+setwd("C:/Users/joshu/Desktop/DSPG")
 extracted_data <- unzip("Data/SIPPDataset2023.zip", "pu2023.csv")
 
 #Getting all useful variables
@@ -56,16 +58,17 @@ pu <- fread(extracted_data, sep = "|", select = c(
   'TWKHRS1','TWKHRS2', 'TWKHRS3', 'TWKHRS4', 'TWKHRS5',
   'TMWKHRS',"EJB1_PVWKTR9", "EJB1_SCRNR", "THTOTINC",
   #Child Variables
-  'TCBYR_1', 'TCBYR_2', 'TCBYR_3', 'TCBYR_4', 'TCBYR_5', 'TCBYR_6',
+  'TCBYR_1', 'TCBYR_2', 'TCBYR_3', 'TCBYR_4', 'TCBYR_5', 'TCBYR_6',"ECHLD_MNYN",
   # Any number after is suppressed
   "SHHADID", "MONTHCODE", "PNUM", "SSUID", "WPFINWGT", "TST_INTV"
+  
   
 ))
 
 #Choosing Variables needed for Model
 vars <- c("SSUID","SHHADID","PNUM","MONTHCODE","SPANEL","WPFINWGT", "EEDUC","TAGE","ESEX", "ERACE", "EMS", "RFAMKIND", "TEHC_METRO", "TEHC_REGION","EOTHR", "THTOTINC",
           "EPAR", "EPAYHELP","ETIMELOST", "ETIMELOST_TP", "EWHOPAID1", "ELIST", "TWKHRS1", "TWKHRS2", "TWKHRS3", "TWKHRS4",
-          "TWKHRS5", "TMWKHRS", "EJB1_PVWKTR9", 'TCBYR_1', 'TCBYR_2', 'TCBYR_3', 'TCBYR_4', 'TCBYR_5', 'TCBYR_6', "EJB1_SCRNR", "TST_INTV")
+          "TWKHRS5", "TMWKHRS", "EJB1_PVWKTR9", 'TCBYR_1', 'TCBYR_2', 'TCBYR_3', 'TCBYR_4', 'TCBYR_5', 'TCBYR_6', "EJB1_SCRNR", "TST_INTV","ECHLD_MNYN")
 data <- pu %>% 
   select(all_of(vars))
 
@@ -210,9 +213,9 @@ data <- data %>%
                        levels = c(1,2,3,4),
                        labels = c("White", "Black", "Asian", "Residual")))
 
-#Child Care Cost (in 100s) Does not Exist in 2024 dataset
-#data <- data %>% 
-  #mutate(ChildCareCostper100 = replace_na(TDEPNDNTEXP,0)/100)
+#Childcare Usage
+data <- data %>% 
+  mutate(ChildCare = if_else(ECHLD_MNYN == 1,1,0))
 
 #Income
 summary(data$THTOTINC)
@@ -259,14 +262,17 @@ summary(data$WorkFromHome)
 
 
 data2 <- data %>% 
-  select(38:ncol(data)) %>% 
+  select(39:ncol(data)) %>% 
   filter(KidsUnder5 != 0)  %>% 
   filter(Weight != 0) %>% 
   mutate(EMP = EMP * 100)
 
-write.csv(data2,"Childcare Project/Data/20-23SIPPData.csv")
+data2$PID <- paste0(as.character(data2$PID),"'")
+
+write.csv(data2,"Childcare Project/Data/SIPP Output/20-23SIPPData.csv")
+
 
 VAData <- data2 %>% 
   filter(State == 51)
 
-write.csv(VAData,"Childcare Project/Data/20-23VASIPPData.csv")
+write.csv(VAData,"Childcare Project/Data/SIPP Output/20-23VASIPPData.csv")
