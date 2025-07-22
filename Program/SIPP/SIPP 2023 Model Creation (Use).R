@@ -13,13 +13,14 @@ library(fixest)
 library(modelsummary)
 library(stargazer)
 library(AER)
-
+library(jtools)
 
 
 # Data Collection + Cleaning ----------------------------------------------
 
 setwd("C:/Users/joshu/Desktop/DSPG/Childcare Project")
-data <- read.csv("Data/Sipp Output/20-23SIPPData.csv")
+data <- read.csv("Data/Sipp Output/20-23SIPPData.csv") %>% 
+  mutate(EMP = if_else(EMP == 100,1,0))
 data$Race <- relevel(factor(data$Race), ref = "White")
 
 
@@ -64,6 +65,8 @@ modelsummary(EMP1,
 
 
 
+
+
 HRSWorked1 <- lm(
   HRSWorked ~ NonMetro + Female + SingleFamily + WelfareorSS + ChildCare +
     Education + ParentAge + WorkFromHome + Race + factor(KidsUnder5) + ChildCare:WelfareorSS,
@@ -102,8 +105,8 @@ summary(TimeLostFE)
 
 EMPFE <- feols(
   EMP ~ NonMetro + Female + SingleFamily + WelfareorSS +
-    Education + ParentAge + Race +
-    factor(KidsUnder5)| HouseholdID + Year + Month + TimeID,
+    Education + ParentAge + Race + ChildCare +
+    factor(KidsUnder5)| Year + Month + TimeID,
   data, weights = ~Weight
 )
 summary(EMPFE)
@@ -171,7 +174,7 @@ summary(TimeLost2)
 EMP2 <- lm(
   EMP ~ NonMetro + Female + SingleFamily + WelfareorSS +
     Education + ParentAge + WorkFromHome + Race + Income +
-    Kid2 + Kid3 + Kid4 + Kid5 + Kid6 +
+    Kid2 + Kid3 + Kid4 + Kid5 + Kid6 + ChildCare + NonMetro:ChildCare +
     age_group1 + Kid2:age_group2 + Kid3:age_group3 + Kid4:age_group4 + Kid5:age_group5 +
     Kid6:age_group6,
   data
@@ -225,4 +228,58 @@ stargazer(Hurdle1,Hurdle2)
 
 
 
+
+## Creating Figure
+plot_summs(EMPBasic, EMP1, EMP2, EMPIV, colors = "Qual1",
+           model.names = c("OLS","OLS with Controls", "OLS With Child Interactions", "IV"), 
+           coefs = c("Female", "ChildCare", "WelfareorSS", "NonMetro", 
+                     "NonMetro:ChildCare"),
+           inner_ci_level = .9)+
+  labs(title = "Key Predictors of Employment",
+       x = "Coefficient Estimate",
+       y = NULL) +
+  ggplot2::theme_bw()
+
+names(coef(EMPBasic))
+
+
+EMPBasic <- lm(EMP ~ Female + WelfareorSS + NonMetro + ChildCare+ NonMetro:ChildCare,
+               data = data, weights = Weight)
+summary(EMPBasic)
+
+
+
+
+EMP1 <- lm(
+  EMP ~ NonMetro + Female + ChildCare  + WelfareorSS +
+    Education + ParentAge + Race + factor(KidsUnder5) +
+    SingleFamily + NonMetro:ChildCare, 
+  data, weights = Weight
+)
+
+
+EMP2 <- lm(
+  EMP ~ NonMetro + Female + SingleFamily + WelfareorSS +
+    Education + ParentAge + WorkFromHome + Race + Income +
+    Kid2 + Kid3 + Kid4 + Kid5 + Kid6 + ChildCare + NonMetro:ChildCare +
+    age_group1 + Kid2:age_group2 + Kid3:age_group3 + Kid4:age_group4 + Kid5:age_group5 +
+    Kid6:age_group6,
+  data
+)
+
+EMPFE <- feols(
+  EMP ~ NonMetro + Female + SingleFamily + WelfareorSS +
+    Education + ParentAge + Race + ChildCare + NonMetro:ChildCare+
+    factor(KidsUnder5)| Year + Month ,
+  data, weights = ~Weight
+)
+summary(EMPFE)
+
+
+EMPIV <- ivreg(
+  EMP ~ NonMetro + Female + ChildCare   +
+    Education + ParentAge + Race + factor(KidsUnder5) +
+    SingleFamily + NonMetro:ChildCare | . -ChildCare + WelfareorSS, 
+  data = data, weights = Weight)
+summary(EMPIV, diagnostics = TRUE)
 

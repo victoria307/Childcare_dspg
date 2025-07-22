@@ -13,15 +13,16 @@ library(R.utils)
 library(fixest)
 
 
-data <- read.csv("Data/cps_00003.csv")
+#gunzip("Data/cps_00004.csv.gz")
+
+data <- read.csv("Data/cps_00006.csv")
 Cost <- read.csv("Data/EMPandRural.csv")
 
 Cost <- Cost %>% 
-  select(COUNTY_FIPS_CODE, STUDYYEAR, MCINFANT, MCTODDLER, MCPRESCHOOL, MFCCINFANT, 
+  dplyr::select(COUNTY_FIPS_CODE, STUDYYEAR, MCINFANT, MCTODDLER, MCPRESCHOOL, MFCCINFANT, 
          MFCCTODDLER, MFCCPRESCHOOL,Urban, POPPCT_URB) %>% 
   filter(STUDYYEAR == 2022)
 
-mean(Cost$MFCCINFANT)
 
 #Key Questions
 #Should we filter out ppl not in labor force
@@ -73,11 +74,10 @@ combined <- combined %>%
   )
   )
 
-
 CenterModel <- feols(EMP ~ Female + Post + ChildCostCenter:Post +
-                    AGE + factor(NCHLT5) + Education + EMPSPOUSE + Married
-                    | COUNTY + YEAR + MONTH + SERIAL, 
-                    data = combined)
+                       AGE + factor(NCHLT5) + Education + EMPSPOUSE + Married
+                     | COUNTY + YEAR + MONTH + SERIAL, 
+                     data = combined)
 
 summary(CenterModel)
 
@@ -97,6 +97,7 @@ modelsummary(XiaoYiModel,
              stars = TRUE,
              statistic = "p.value",
              output = "latex")
+
 
 
 
