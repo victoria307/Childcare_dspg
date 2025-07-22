@@ -33,7 +33,7 @@ VA_data <- VA_data %>%
 map_data_all <- va_counties %>%
   left_join(VA_data, by = c("GEOID" = "COUNTY_FIPS_CODE"))
 
-VDOE_data <- read_csv("Data/WB+VDOE copy.csv")
+VDOE_data <- read_csv("Data/VDOE+WB+Rural.csv")
 total_by_date <- VDOE_data %>%
   group_by(date) %>%
   summarise(Total_Count = sum(Total_Count, na.rm = TRUE)) %>%
@@ -72,14 +72,30 @@ policy_data <- data.frame(
     "2024-06-04",
     "2024-01-10"
   )),
+  end = as.Date(c(
+    NA,  # ended policy
+    NA,  # ongoing
+    NA, # ended policy
+    "2023-01-01",
+    NA,
+    NA,
+    "2024-07-01",
+    NA,
+    NA,
+    NA,
+    NA,
+    NA,
+    NA
+    )),
+  
   summary = c(
     "In 2018, Virginia increased reimbursement rates for licensed providers to align more closely with the 70th percentile of the market rate survey.",
     "In 2020, a report was released explaining funding allocation within CCDF.",
     "The CCDF was transitioned from the Virginia Department of Social Services (VDSS) to the Virginia Department of Education (VDOE). The plan included a phased shift to bringing all aspects of subsidies to the VDOE. It also brought up the shift to Virginia Quality Inititiavies (VQI) and how it will be implemented in phases, along with impact of COVID-19 on childcare and updates on supporting CCDF through COVID-19.",
-    "In 2021 the CCDF was given funds under the Coronavirus Response and Relief Supplemental appropriations Act (CRRSA). The goals to utilize these funds was to increase the supply of childcare, increase resources for providers and families, expand requirements for subsidies, and to increase access to childcare in underserved communities. Copayments were eliminated and other eligibility requirements would soon be changing as well.",
+    "In 2021 the CCDF was given funds under the Coronavirus Response and Relief Supplemental appropriations Act (CRRSA). The goals to utilize these funds was to increase the supply of childcare, increase resources for providers and families, expand requirements for subsidies, and to increase access to childcare in underserved communities. Copayments were eliminated and other eligibility requirements would soon be changing as well. *The shaded region below represents the timeframe copayments to providers were eliminated.",
     "A bill temporarily expanding subsidy program to those who are actively looking for work and raising the qualifying threshhold to those who's income is below 85% of the state median income.",
     "Provided 9.6 Million Dollars to CCDF to expand the subsidy program.",
-    "This bill maximized the use of federal CCDF funds to eliminate the waitlist for subsidies. It also continued the 85% of median income eligibility to the 2022-2024 biennium.",
+    "This bill maximized the use of federal CCDF funds to eliminate the waitlist for subsidies. It also continued the 85% of federal povery line eligibility requirement to the 2022-2024 biennium. *The shaded region below represents the timeframe waitlists for subsidies were eliminated.",
     "This correspondence informed subsidy providers that copays will be reinstated January 1 2023, and brought up that with it would be a new copayment scale.",
     "This correspondence informed subsidy providers that payment rates would be changing to fit a new cost estimation model, giving a majority of centers increased rates. It also mentioned new copayment scales, along with subsidy providers now being paid for 15 days of planned holidays.",
     "This correspondence effectively changed the number of allotted absence days still paid to the provider from 36 to 60 days a year.",
@@ -395,17 +411,34 @@ server <- function(input, output, session) {
   observeEvent(input$timeline_selected, {
     selected_id <- input$timeline_selected
     if (!is.null(selected_id)) {
-      selected_date <- as.Date(policy_data$start[policy_data$id == selected_id])
-      selected_range(c(selected_date - 30, selected_date + 30))
+      start_date <- as.Date(policy_data$start[policy_data$id == selected_id])
+      end_date <- policy_data$end[policy_data$id == selected_id]
+      
+      if (!is.na(end_date)) {
+        end_date <- as.Date(end_date)
+        selected_range(c(start_date, end_date))
+      } else {
+        # fallback: +/- 30 days if no end date
+        selected_range(c(start_date - 30, start_date + 30))
+      }
     } else {
       selected_range(NULL)
     }
   })
+  
+  # TIMELINE AND GRAPH BELOW
   output$line_plot <- renderEcharts4r({
-    p <- total_by_date %>%
+    rural_urban_by_date <- VDOE_data %>%
+      group_by(date, Urban.y) %>%
+      summarise(Total_Count = sum(Total_Count, na.rm = TRUE), .groups = "drop") %>%
+      mutate(Urban.y = ifelse(Urban.y == 1, "Urban", "Rural"))
+    
+    p <- rural_urban_by_date %>%
+      group_by(Urban.y) %>%
       e_charts(date) %>%
-      e_line(Total_Count, name = "Total Count") %>%
+      e_line(Total_Count, name = NULL) %>%
       e_tooltip(trigger = "axis") %>%
+      e_legend(right = 10) %>%
       e_x_axis(
         type = "time",
         name = "Date",
@@ -414,10 +447,9 @@ server <- function(input, output, session) {
         )
       ) %>%
       e_y_axis(name = "Total Count", min = 0) %>%
-      e_title("Total Count of Children on Subsidies Over Time") %>%
+      e_title("Total Count of Children on Subsidies Over Time (Rural vs Urban)") %>%
       e_datazoom(type = "slider", start = 0, end = 100)
     
-    # ✅ Add vertical policy lines (must convert to character)
     for (d in as.Date(policy_data$start)) {
       p <- p %>%
         e_mark_line(
@@ -427,10 +459,8 @@ server <- function(input, output, session) {
         )
     }
     
-    # ✅ Add shaded area if a range is selected
     if (!is.null(selected_range())) {
       range <- selected_range()
-      
       p <- p %>%
         e_mark_area(
           data = list(
@@ -456,7 +486,6 @@ server <- function(input, output, session) {
 }
 # Run App -----------------------------------------------------------------
 shinyApp(ui = ui, server = server)
-
 
 
 
