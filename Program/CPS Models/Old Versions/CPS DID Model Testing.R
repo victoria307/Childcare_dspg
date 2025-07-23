@@ -1,3 +1,5 @@
+## Editing This Code
+
 ## File Setup ----
 # Cleaning Enviorment ----
 rm(list=ls())
@@ -15,6 +17,7 @@ library(R.utils)
 library(fixest)
 library(caret)
 library(fastDummies)
+library(viridis)
 
 # Loading in data ----
 #gunzip("Data/cps_00006.csv.gz")
@@ -26,19 +29,14 @@ data$CPSID <- as.character(data$CPSID)
 data$CPSIDP <- as.character(data$CPSIDP)
 
 data <- data %>% 
-  dplyr::select(-c(HWTFINL, ASECFLAG, ASECWTH, WTFINL, ASECWT))
+  dplyr::select(-c(ASECFLAG, ASECWTH, HWTFINL, WTFINL, ASECWT, UHRSWORK1, COUNTY,))
 
 # Data Cleaning ----
 #Key Questions
 #Should we filter out ppl not in labor force
 
-data <- data %>% 
-  filter(COUNTY != 0,
-         FAMSIZE != 0,
-         NCHILD != 0,
-         UHRSWORK1 != 997
-  ) %>% 
-  mutate(UHRSWORK1 = if_else(UHRSWORK1 == 999,0,UHRSWORK1),
+dataMain <- data%>% 
+  mutate(
          Education = case_when(
            EDUC <= 72 ~ "No HS",
            EDUC == 73 ~ "HS",
@@ -89,29 +87,30 @@ data <- data %>%
            RACE >= 800 ~ "2+ Race",
            TRUE ~ NA
          ),
-         Urban = if_else(METRO == 3,1,0)
+         Rural = if_else(METRO == 3,1,0),
+         ChildUnder5 = if_else(NCHLT5 > 0,1,0)
          
          
   )
 
 
-data <- data %>%
-  filter(if_all(everything(), ~ !is.na(.)),
-         !is.na(RACE)) %>% 
+data2 <- dataMain %>% 
+  dplyr::select(-c(SERIAL, CPSID, STATEFIP,
+                   METRO, PERNUM, CPSIDP, CPSIDV, SEX, RACE,
+                   MARST, EMPSTAT, EDUC, FAMINC,EMPSTAT_SP))
+
+data2 <- data2 %>%
+  filter(if_all(everything(), ~ !is.na(.))) %>% 
   mutate(across(where(is.character), as.factor))
 
 
 
-data2 <- data %>% 
-  dplyr::select(-c(SERIAL, CPSID, STATEFIP,
-            METRO, PERNUM, CPSIDP, CPSIDV, SEX, RACE,
-            MARST, EMPSTAT, EDUC, FAMINC,-EMPSTAT_SP))
 
 
 
 EMP1 <- lm(EMP ~ Subsidy + Post + Subsidy:Post
            + AGE + FAMSIZE + NCHLT5 + Married + Female + Race
-           + Urban, data = data)
+           + Rural, data = data2)
 
 summary(EMP1)
 
@@ -162,6 +161,38 @@ registerDoSEQ()
 results <- resamples(list(lda=fit.lda, cart=fit.cart, knn=fit.knn, svm=fit.svm, rf=fit.rf))
 summary(results)
 
+#Looking at Out of Sample Accuracy
+
+library(caret)
+
+# Create a named list of models
+models <- list(
+  lda = fit.lda,
+  cart = fit.cart,
+  knn = fit.knn,
+  svm = fit.svm,
+  rf = fit.rf
+)
+
+# Initialize empty lists to store results
+out_sample_results <- lapply(models, function(model) {
+  pred <- predict(model, newdata = x_test)
+  cm <- confusionMatrix(pred, y_test$Subsidy)
+  data.frame(
+    Accuracy = cm$overall["Accuracy"],
+    Kappa = cm$overall["Kappa"]
+  )
+})
+
+# Combine into a single data frame
+out_sample_df <- do.call(rbind, out_sample_results)
+out_sample_df <- round(out_sample_df, 3)
+out_sample_df$Model <- rownames(out_sample_df)
+rownames(out_sample_df) <- NULL
+
+# Show results
+out_sample_df
+
 
 # Creating Visual for ML Model ----
 
@@ -169,36 +200,45 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(viridis)
+library(extrafont)
 
 
 model_perf <- tibble::tibble(
   Model = c("LDA", "Cart", "KNN", "SVM", "RF"),
-  Accuracy = c(0.6949, 0.6766, 0.7846, 0.7514, 0.9273),
-  Kappa = c(0.3127, 0.1600, 0.5486, 0.4259, 0.8520)
+  Accuracy = c(0.699, 0.685, 0.831, 0.755, 0.943),
+  Kappa = c(0.305, 0.224, 0.650, 0.421, 0.885)
 )
+
+
 
 model_long <- model_perf %>%
   pivot_longer(cols = c(Accuracy, Kappa), names_to = "Metric", values_to = "Value")
 
 # Plot
+
 ggplot(model_long, aes(x = reorder(Model, Value), y = Value, fill = Model)) +
   geom_col(width = 0.6) +
   geom_text(aes(label = round(Value, 3)), vjust = -0.5, size = 4.5) +
   facet_wrap(~ Metric, scales = "free_y") +
-  scale_fill_viridis_d(option = "D") +
+  #Mako for Website (G) and rocket for Poster
+  scale_fill_viridis_d(option = "G") +
   scale_y_continuous(limits = c(0, 1))+
-  labs(title = "Model Performance Comparison",
+  labs(title = "Out of Sample Model Performance Comparison",
        x = "Model",
        y = "Score") +
-  theme_bw(base_size = 15) +
-  theme(legend.position = "none",
-        strip.text = element_text(face = "bold", size = 16))
+  theme_bw(base_size = 15, base_family = "Times New Roman") +
+  theme(
+    legend.position = "none",
+    strip.text = element_text(face = "bold", size = 16, family = "Times New Roman"),
+    axis.text = element_text(family = "Times New Roman"),
+    axis.title = element_text(family = "Times New Roman"),
+    plot.title = element_text(family = "Times New Roman", hjust = 0.5))
 
 
 
 
 #Creating Dataset----
-finalData <- data
+finalData <- dataMain
 x_full_raw <- finalData %>% dplyr::select(-Subsidy)
 x_full <- predict(dummies, newdata = x_full_raw) %>% as.data.frame()
 
@@ -206,20 +246,24 @@ predicted_class <- predict(fit.rf, newdata = x_full)
 
 finalData$predicted_subsidy <- predicted_class
 
+
+
 #Modeling ----
 
-finalData <- finalData %>% 
-  filter(NCHLT5 > 0)
+finalData <- finalData %>% filter(NCHLT5 > 0)
+
+summary(finalData$predicted_subsidy)
+
 
 EMP2 <- lm(EMP ~ predicted_subsidy + Post + predicted_subsidy:Post
            + AGE + FAMSIZE + NCHLT5 + EMPSPOUSE + Married + Female + Race
-           + Urban + Education, data = finalData)
+           + Rural + Education, data = finalData)
 
 summary(EMP2) 
 
-EMP3 <- feols(EMP ~ predicted_subsidy + Post + predicted_subsidy:Post
-                         + AGE + NCHLT5 + Married + Female + Race
-                         + Urban + Education|CPSIDP + YEAR + MONTH, data = finalData)
+EMP3 <- feols(EMP ~ predicted_subsidy + Post + predicted_subsidy:Post + 
+                + AGE + NCHLT5 + Married + Female + Race +
+                + Rural + Education|CPSIDP + YEAR + MONTH, data = finalData)
 summary(EMP3)
 
 

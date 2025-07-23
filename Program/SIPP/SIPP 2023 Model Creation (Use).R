@@ -141,7 +141,7 @@ HRSWorkedFE <- feols(
     factor(KidsUnder5)|Year + Month,
   HRsData, weights = ~Weight
 )
-summary(HRSWorkedFEINT)
+summary(HRSWorkedFE)
 
 
 HRSWorkedFEINT <- feols(
@@ -230,18 +230,6 @@ stargazer(Hurdle1,Hurdle2)
 
 
 ## Creating Figure
-plot_summs(EMPBasic, EMP1, EMP2, EMPIV, colors = "Qual1",
-           model.names = c("OLS","OLS with Controls", "OLS With Child Interactions", "IV"), 
-           coefs = c("Female", "ChildCare", "WelfareorSS", "NonMetro", 
-                     "NonMetro:ChildCare"),
-           inner_ci_level = .9)+
-  labs(title = "Key Predictors of Employment",
-       x = "Coefficient Estimate",
-       y = NULL) +
-  ggplot2::theme_bw()
-
-names(coef(EMPBasic))
-
 
 EMPBasic <- lm(EMP ~ Female + WelfareorSS + NonMetro + ChildCare+ NonMetro:ChildCare,
                data = data, weights = Weight)
@@ -256,6 +244,12 @@ EMP1 <- lm(
     SingleFamily + NonMetro:ChildCare, 
   data, weights = Weight
 )
+summary(EMP1)
+
+modelsummary(EMP1, 
+             stars = TRUE,
+             statistic = "p.value",
+             output = "latex")
 
 
 EMP2 <- lm(
@@ -283,3 +277,16 @@ EMPIV <- ivreg(
   data = data, weights = Weight)
 summary(EMPIV, diagnostics = TRUE)
 
+
+#Mako for Website (G) and rocket for Poster
+plot_summs(EMPBasic, EMP1, EMP2, EMPIV,
+           colors = viridis_pal(option = "G")(6)[c(1, 3, 4, 5)],
+           model.names = c("OLS", "OLS with Controls", 
+                           "OLS With Child Interactions", "IV"),
+           coefs = c("Female", "ChildCare", "WelfareorSS", 
+                     "NonMetro", "NonMetro:ChildCare"),
+           inner_ci_level = .9) +
+  labs(title = "Key Predictors of Employment",
+       x = "Coefficient Estimate",
+       y = NULL) +
+  theme_bw(base_family = "Times New Roman")
