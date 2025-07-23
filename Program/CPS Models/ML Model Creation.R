@@ -148,7 +148,7 @@ fit.rf <- train(x_train, y_train$Subsidy, method = "rf", metric = metric, trCont
 
 
 
-saveRDS(fit.rf, file = "fit_rf_model.rds")
+saveRDS(fit.rf, file = "Program/CPS Models/fit_rf_model.rds")
 
 stopCluster(cl)
 registerDoSEQ()
