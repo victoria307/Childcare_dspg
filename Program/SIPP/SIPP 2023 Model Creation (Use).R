@@ -14,7 +14,8 @@ library(modelsummary)
 library(stargazer)
 library(AER)
 library(jtools)
-
+library(viridis)
+library(ggplot2)
 
 # Data Collection + Cleaning ----------------------------------------------
 
@@ -53,7 +54,7 @@ stargazer(TimeLost1, type = "text")
 EMP1 <- lm(
   EMP ~ NonMetro + Female + ChildCare  + WelfareorSS +
     Education + ParentAge + Race + factor(KidsUnder5) +
-    SingleFamily + ChildCare:NonMetro, 
+    SingleFamily + ChildCare:NonMetro , 
   data, weights = Weight
 )
 summary(EMP1)
@@ -280,7 +281,7 @@ summary(EMPIV, diagnostics = TRUE)
 
 #Mako for Website (G) and rocket for Poster
 plot_summs(EMPBasic, EMP1, EMP2, EMPIV,
-           colors = viridis_pal(option = "G")(6)[c(1, 3, 4, 5)],
+           colors = viridis_pal(option = "rocket")(6)[c(1, 3, 4, 5)],
            model.names = c("OLS", "OLS with Controls", 
                            "OLS With Child Interactions", "IV"),
            coefs = c("Female", "ChildCare", "WelfareorSS", 
@@ -289,4 +290,13 @@ plot_summs(EMPBasic, EMP1, EMP2, EMPIV,
   labs(title = "Key Predictors of Employment",
        x = "Coefficient Estimate",
        y = NULL) +
-  theme_bw(base_family = "Times New Roman")
+  theme_bw(base_family = "Times New Roman") +
+  theme(legend.position = "bottom",
+        legend.justification = c(0, 0), 
+        legend.box.just = "left",
+        text = element_text(size = 14),                    
+        axis.text.y = element_text(size = 14, face = "bold"),  
+        axis.text.x = element_text(size = 14),              
+        plot.title = element_text(size = 18, face = "bold")
+  )
+

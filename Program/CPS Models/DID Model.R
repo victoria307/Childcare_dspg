@@ -16,6 +16,7 @@ library(fixest)
 library(caret)
 library(fastDummies)
 library(viridis)
+library(modelsummary)
 
 # Loading in data ----
 #gunzip("Data/cps_00006.csv.gz")
@@ -86,7 +87,7 @@ data <- data %>%
       TRUE ~ NA
     ),
     
-    Urban = if_else(METRO == 3,1,0)
+    Rural = if_else(METRO == 3,1,0)
     
     
   )
@@ -130,13 +131,34 @@ summary(finalData$predicted_subsidy)
 
 EMP3 <- feols(EMP ~ predicted_subsidy + Post + predicted_subsidy:Post
               + AGE + NCHLT5 + Married + Female + Race 
-                + Urban + Education|CPSID + YEAR + MONTH, data = finalData)
+                + Rural + Education|CPSID + YEAR + MONTH, data = finalData)
 summary(EMP3)
 
 
+modelsummary(EMP3, 
+             stars = TRUE,
+             statistic = "p.value",
+             output = "latex")
 
 
+summary(EMP3)
+wald(EMP3)
 
 
+finalData <- finalData %>%
+  mutate(EventTime = 12 * (YEAR - 2022) + (MONTH - 6))  # if policy in July 2022
+
+TestData <- finalData %>% 
+  filter(predicted_subsidy %in% c("Newly_Eligible", "Always_Eligible"))
+         
+
+EMP_event <- feols(EMP ~ i(EventTime, predicted_subsidy == "Newly_Eligible", ref = -1) +
+                     AGE + NCHLT5 + Married + Female + Race + Rural + Education |
+                     CPSID + YEAR + MONTH, data = TestData)
+
+iplot(EMP_event,
+      main = "Event Study: Policy Impact on Employment",
+      xlab = "Months Relative to Policy",
+      ref.line = 0)
 
 

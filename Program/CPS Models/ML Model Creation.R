@@ -86,7 +86,7 @@ data <- data %>%
       TRUE ~ NA
     ),
     
-    Urban = if_else(METRO == 3,1,0)
+    Rural = if_else(METRO == 3,1,0)
     
     
   )
@@ -212,7 +212,7 @@ ggplot(model_long, aes(x = reorder(Model, Value), y = Value, fill = Model)) +
   #Mako for Website (G) and rocket for Poster
   scale_fill_viridis_d(option = "rocket") +
   scale_y_continuous(limits = c(0, 1))+
-  labs(title = "Out of Sample Model Performance Comparison",
+  labs(title = "Model Performance Comparison Predicting Income",
        x = "Model",
        y = "Score") +
   theme_bw(base_size = 15, base_family = "Times New Roman") +
