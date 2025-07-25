@@ -194,7 +194,7 @@ ui <- navbarPage(
                  tags$ul(
                    tags$li("How do childcare prices differ across the state of Virginia, specifically between rural and urban areas?"),
                    tags$li("What is the relationship between labor outcomes and the usage of childcare, and how do subsidy usage, gender, and locality play a role in said relationship?"),
-                   tags$li("How do changes in Virginia state policies impact the program participation, and how does this demand differ across the state?")
+                   tags$li("How do changes in Virginia state policies to the Child Care Development Fund (CCDF) impact program participants?")
                  )
                )
              ),
@@ -264,14 +264,32 @@ ui <- navbarPage(
              )
            )
   ),
-  
-  tabPanel("Research Implications",
-           fluidPage(
-             h2("Implications"),
-             p("Describe your models or predictions."),
-             p("Describing the models or predictions.")
-           )
-  ), 
+  tabPanel("Modeling",
+           tabsetPanel(
+    tabPanel("Predicting Employment Outcomes",
+             fluidPage(
+               withMathJax(),
+               h2("Using SIPP Dataset to find factors of Employment"),
+               
+               )
+             ),
+    tabPanel("Machine Learning Model",
+             fluidPage(
+               h2("Implications"),
+               p("Describe your models or predictions."),
+               p("Describing the models or predictions.")
+               ), 
+             ),
+    tabPanel("CPS Model",
+             fluidPage(
+               withMathJax(),
+               h2("Implications"),
+               p("Describe your models or predictions."),
+               p("Describing the models or predictions.")
+               ),
+             ),
+    ),
+    ),
   tabPanel("About Us",
            fluidPage(
              div(
