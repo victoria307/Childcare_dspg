@@ -15,7 +15,7 @@ library(scales)
 options(tigris_use_cache = TRUE)
 
 # Prepare Data -------------------------------------------------
-data <- read_excel("Women's Bureau Data Work/Cleaned_Virginia_Womens_Bureau.xlsx")
+data <- read_excel("Women's Bureau Data Work/Cleaned_Virginia_Womens_Bureau.xlsx") %>%
   mutate(
     FIPS = str_pad(as.character(COUNTY_FIPS_CODE), 5, pad = "0"),
     MCINFANT = as.numeric(MCINFANT),
@@ -24,6 +24,7 @@ data <- read_excel("Women's Bureau Data Work/Cleaned_Virginia_Womens_Bureau.xlsx
     FLFPR_20to64_UNDER6 = as.numeric(FLFPR_20to64_UNDER6),
     Urban = as.numeric(Urban)
   )
+
 
 va_map <- counties(state = "VA", cb = TRUE, class = "sf") %>%
   mutate(FIPS = str_pad(as.character(GEOID), 5, pad = "0"))
