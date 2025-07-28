@@ -743,29 +743,39 @@ server <- function(input, output, session) {
     }
   })
   
+  selected_range <- reactiveVal(NULL)
+  
+  observeEvent(input$timeline_selected, {
+    selected_id <- input$timeline_selected
+    if (!is.null(selected_id)) {
+      start_date <- as.Date(policy_data$start[policy_data$id == selected_id])
+      end_date <- policy_data$end[policy_data$id == selected_id]
+      
+      if (!is.na(end_date)) {
+        end_date <- as.Date(end_date)
+        selected_range(c(start_date, end_date))
+      } else {
+        # fallback: +/- 30 days if no end date
+        selected_range(c(start_date - 30, start_date + 30))
+      }
+    } else {
+      selected_range(NULL)
+    }
+  })
+  
+  # TIMELINE AND GRAPH BELOW
   output$line_plot <- renderEcharts4r({
-    # Summarise by Rural/Urban
     rural_urban_by_date <- VDOE_data %>%
       group_by(date, Urban.y) %>%
       summarise(Total_Count = sum(Total_Count, na.rm = TRUE), .groups = "drop") %>%
       mutate(Urban.y = ifelse(Urban.y == 1, "Urban", "Rural"))
     
-    # Calculate total (Rural + Urban)
-    total_by_date <- rural_urban_by_date %>%
-      group_by(date) %>%
-      summarise(Total_Count = sum(Total_Count), .groups = "drop") %>%
-      mutate(Urban.y = "Total")
-    
-    # Combine data
-    combined_data <- bind_rows(rural_urban_by_date, total_by_date)
-    
-    # Build chart
-    p <- combined_data %>%
+    p <- rural_urban_by_date %>%
       group_by(Urban.y) %>%
       e_charts(date) %>%
-      e_line(Total_Count, name = ~Urban.y) %>%
+      e_line(Total_Count, name = NULL) %>%
       e_tooltip(trigger = "axis") %>%
-      e_legend(show = TRUE, right = 10) %>%
+      e_legend(right = 10) %>%
       e_x_axis(
         type = "time",
         name = "Date",
@@ -777,7 +787,6 @@ server <- function(input, output, session) {
       e_title("Total Count of Children on Subsidies Over Time (Rural vs Urban)") %>%
       e_datazoom(type = "slider", start = 0, end = 100)
     
-    # Add vertical dashed lines for policies
     for (d in as.Date(policy_data$start)) {
       p <- p %>%
         e_mark_line(
@@ -787,7 +796,6 @@ server <- function(input, output, session) {
         )
     }
     
-    # Highlight selected range
     if (!is.null(selected_range())) {
       range <- selected_range()
       p <- p %>%
@@ -812,7 +820,9 @@ server <- function(input, output, session) {
     
     p
   })
-  
+        
+    
+   
 
 # Joshua Tables -----------------------------------------------------------
   
