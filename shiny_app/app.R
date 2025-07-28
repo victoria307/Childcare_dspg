@@ -276,155 +276,132 @@ ui <- navbarPage(
 
 # Joshua Stuff ------------------------------------------------------------
 
-  
-  navbarMenu("Modeling",
-             tabPanel("Variables Important to Female Employment",
-                      fluidPage(
-                        h2("Variables Important to Female Employment"),
-                        sidebarLayout(
-                          sidebarPanel(
-                            h4("Methodology"),
-                            p("Describe your regression model, data sources, and sample size."),
-                            tags$ul(
-                              tags$li("Survey data from CPS and SIPP"),
-                              tags$li("DiD model with robust standard errors"),
-                              tags$li("Controls: age, education, number of children")
-                            )
-                          ),
-                          mainPanel(
-                            h4("Regression Output"),
-                            br(),
+navbarMenu("Modeling",
+           tabPanel("Variables Important to Female Employment",
+                    fluidPage(
+                      h2("Variables Important to Female Employment"),
+                      sidebarLayout(
+                        sidebarPanel(
+                          h4("Methodology"),
+                          p("Describe your regression model, data sources, and sample size."),
+                          tags$ul(
+                            tags$li("Survey data from CPS and SIPP"),
+                            tags$li("DiD model with robust standard errors"),
+                            tags$li("Controls: age, education, number of children")
                           )
+                        ),
+                        mainPanel(
+                          h4("Regression Output"),
+                          br(),
                         )
-                      ),
-  tabPanel("Modeling",
-           tabsetPanel(
-    tabPanel("Predicting Employment Outcomes",
-             fluidPage(
-               withMathJax(),
-               h2("Using SIPP Dataset to find factors of Employment"),
-               img(src = "images/chart1.png", height = "200px"),
-               br()
-               
-               )
-             ),
-             tabPanel("Predicting Employment Outcomes",
-                      fluidPage(
-                        h2("Predicting Employment Outcomes"),
-                        sidebarLayout(
-                          sidebarPanel(
-                            div(
-                              style = "position: sticky; top: 80px;",
-                              h4(tags$strong("Methodology")),
-                              p("Using Ordinary Least Squares, we analyzed the Survey of Income and Program Participation"),
-                              tags$ul(
-                                tags$li("National Survey data from 2020 - 2023"),
-                                tags$li("Filtered for households with at least one child under the age of 5"),
-                                tags$li("Welfare or SS variable was used as a proxy for subsidy")
-                              ),
-                              img(
-                                src = "images/chart1.png",
-                                width = "100%",
-                                style = "border:1px solid #ccc; border-radius:8px;",
-                                alt = "Key Predictors of Employment Chart"
-                              )
+                      )
+                    )
+           ),
+           tabPanel("Predicting Employment Outcomes",
+                    fluidPage(
+                      h2("Predicting Employment Outcomes"),
+                      sidebarLayout(
+                        sidebarPanel(
+                          div(
+                            style = "position: sticky; top: 80px;",
+                            h4(tags$strong("Methodology")),
+                            p("Using Ordinary Least Squares, we analyzed the Survey of Income and Program Participation"),
+                            tags$ul(
+                              tags$li("National Survey data from 2020 - 2023"),
+                              tags$li("Filtered for households with at least one child under the age of 5"),
+                              tags$li("Welfare or SS variable was used as a proxy for subsidy")
+                            ),
+                            img(
+                              src = "images/chart1.png",
+                              width = "100%",
+                              style = "border:1px solid #ccc; border-radius:8px;",
+                              alt = "Key Predictors of Employment Chart"
                             )
-                          ),
-                          
-                          mainPanel(
-                            h4(tags$strong("Model Equation (OLS with Controls)")),
-                            withMathJax(
-                              helpText("$$
+                          )
+                        ),
+                        
+                        mainPanel(
+                          h4(tags$strong("Model Equation (OLS with Controls)")),
+                          withMathJax(
+                            helpText("$$
 \\begin{aligned}
 \\text{Employment}_{i,t} &= \\beta_0 + \\beta_1 \\text{Female}_{i,t} + \\beta_2 \\text{Childcare}_i + \\beta_3 \\text{NonMetro}_{i,t} \\\\
 &\\quad + \\beta_4 \\text{WelfareorSS}_{i,t} + \\beta_5 \\text{(NonMetro * Childcare)}_{i,t} \\\\
 &\\quad + \\text{Controls}_{i,t} \\boldsymbol{\\gamma} + \\epsilon_{i,t}
 \\end{aligned}
 $$")
-                            ),
-                            br(),
-                            h4(tags$strong("Key Variables (OLS with Controls)")),
-                            htmlOutput("SIPPKey"),
-                            tags$div(
-                              style = "margin-top: -15px; ; font-size: 0.9em; font-style: italic; font-family: 'Times New Roman', Times, serif;",
-                              HTML("Note: <b>+</b> p &lt; 0.1;&nbsp; <b>*</b> p &lt; 0.05;&nbsp; <b>**</b> p &lt; 0.01;&nbsp; <b>***</b> p &lt; 0.001")
-                            ),
-                            br(),
-                            h4(tags$strong("Controls (OLS with Controls)")),
-                            htmlOutput("SIPPControls"),
-                            tags$div(
-                              style = "margin-top: -15px; ; font-size: 0.9em; font-style: italic; font-family: 'Times New Roman', Times, serif;",
-                              HTML("Note: <b>+</b> p &lt; 0.1;&nbsp; <b>*</b> p &lt; 0.05;&nbsp; <b>**</b> p &lt; 0.01;&nbsp; <b>***</b> p &lt; 0.001")
-                            )
-                            
+                          ),
+                          br(),
+                          h4(tags$strong("Key Variables (OLS with Controls)")),
+                          htmlOutput("SIPPKey"),
+                          tags$div(
+                            style = "margin-top: -15px; ; font-size: 0.9em; font-style: italic; font-family: 'Times New Roman', Times, serif;",
+                            HTML("Note: <b>+</b> p &lt; 0.1;&nbsp; <b>*</b> p &lt; 0.05;&nbsp; <b>**</b> p &lt; 0.01;&nbsp; <b>***</b> p &lt; 0.001")
+                          ),
+                          br(),
+                          h4(tags$strong("Controls (OLS with Controls)")),
+                          htmlOutput("SIPPControls"),
+                          tags$div(
+                            style = "margin-top: -15px; ; font-size: 0.9em; font-style: italic; font-family: 'Times New Roman', Times, serif;",
+                            HTML("Note: <b>+</b> p &lt; 0.1;&nbsp; <b>*</b> p &lt; 0.05;&nbsp; <b>**</b> p &lt; 0.01;&nbsp; <b>***</b> p &lt; 0.001")
                           )
+                          
                         )
                       )
-             ),
-             tabPanel("Machine Learning Model",
-                      fluidPage(
-                        h2("Machine Learning Model"),
-                        sidebarLayout(
-                          sidebarPanel(
-                            h4("Methodology"),
-                            p("Describe your regression model, data sources, and sample size."),
-                            tags$ul(
-                              tags$li("Survey data from CPS and SIPP"),
-                              tags$li("DiD model with robust standard errors"),
-                              tags$li("Controls: age, education, number of children")
-                            )
-                          ),
-                          mainPanel(
-                            h4("Regression Output"),
-                            DT::dataTableOutput("regression_table"),
-                            br(),
-                            
-                            )
+                    )
+           ),
+           tabPanel("Machine Learning Model",
+                    fluidPage(
+                      h2("Machine Learning Model"),
+                      sidebarLayout(
+                        sidebarPanel(
+                          h4("Methodology"),
+                          p("Describe your regression model, data sources, and sample size."),
+                          tags$ul(
+                            tags$li("Survey data from CPS and SIPP"),
+                            tags$li("DiD model with robust standard errors"),
+                            tags$li("Controls: age, education, number of children")
                           )
+                        ),
+                        mainPanel(
+                          h4("Regression Output"),
+                          DT::dataTableOutput("regression_table"),
+                          br(),
+                          
                         )
-                      ),
-             tabPanel("Fixed Effects Differences-in-Differences Model",
-                      fluidPage(
-                        h2("Fixed Effects Differences-in-Differences Model"),
-                        sidebarLayout(
-                          sidebarPanel(
-                            h4("Methodology"),
-                            p("Describe your regression model, data sources, and sample size."),
-                            tags$ul(
-                              tags$li("Survey data from CPS and SIPP"),
-                              tags$li("DiD model with robust standard errors"),
-                              tags$li("Controls: age, education, number of children")
-                            )
-                          ),
-                          mainPanel(
-                            h4("Regression Output"),
-                            DT::dataTableOutput("regression_table"),
-                            br(),
-                            h4("Model Equation"),
-                            withMathJax(
-                              helpText("$$
+                      )
+                    )
+           ),
+           tabPanel("Fixed Effects Differences-in-Differences Model",
+                    fluidPage(
+                      h2("Fixed Effects Differences-in-Differences Model"),
+                      sidebarLayout(
+                        sidebarPanel(
+                          h4("Methodology"),
+                          p("Describe your regression model, data sources, and sample size."),
+                          tags$ul(
+                            tags$li("Survey data from CPS and SIPP"),
+                            tags$li("DiD model with robust standard errors"),
+                            tags$li("Controls: age, education, number of children")
+                          )
+                        ),
+                        mainPanel(
+                          h4("Regression Output"),
+                          DT::dataTableOutput("regression_table"),
+                          br(),
+                          h4("Model Equation"),
+                          withMathJax(
+                            helpText("$$
             Employment_{it} = \\beta_0 + \\beta_1 Childcare_{it} + \\beta_2 Female_i +
             \\beta_3 NonMetro_{it} + \\beta_4 Welfare_{it} + \\epsilon_{it}
           $$")
-                            )
                           )
                         )
                       )
-    )
-  ),
+                    )
+           )
+),
 
-
-# End of Joshua Section ---------------------------------------------------
-    tabPanel("CPS Model",
-             fluidPage(
-               withMathJax(),
-               h2("Implications"),
-               p("Describe your models or predictions."),
-               p("Describing the models or predictions.")
-               ),
-             ),
-    ),
-    ),
   #ABOUT US-------
   tabPanel("About Us",
            fluidPage(
@@ -631,7 +608,7 @@ $$")
              )
            )
   )
-)))
+))
 
 
 # Server ------------------------------------------------------------------
