@@ -9,7 +9,7 @@ library(plotly)
 library(viridisLite)
 
 # Load and preprocess data
-data <- read_excel("Interactive_Elements/Virginia_RFModel_Data_For_Factors_On_Female_Employment.xlsx")
+data <- read_excel("c:/Users/waiy/OneDrive - Berea College/Documents/Childcare_draft/Childcare and Female Laborforce/Virginia_Model_Data.xlsx")
 
 model_data <- data %>%
   select(
@@ -22,7 +22,6 @@ model_data <- data %>%
     h_under6_singlem, h_under6_bothwork
   ) %>%
   na.omit()
-
 
 # Train-test split
 set.seed(123)
