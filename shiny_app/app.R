@@ -9,6 +9,9 @@ library(plotly)
 library(shinydashboard)
 library(echarts4r)
 library(timevis)  # added for timeline
+library(DT)
+library(kableExtra)
+
 
 options(tigris_use_cache = TRUE)
 
@@ -122,6 +125,11 @@ policy_data <- data.frame(
 )
 policy_data$start <- as.character(policy_data$start)
 
+
+
+
+
+
 # UI ----------------------------------------------------------------------
 
 ui <- navbarPage(
@@ -202,14 +210,6 @@ ui <- navbarPage(
            )
   ),
   
-  tabPanel("Methodology",
-           fluidPage(
-             h2("Methodology"),
-             p("Details of your methodology."),
-             p("Details of our methodology.")
-           )
-  ),
-  
   tabPanel("Understanding Policy",
            fluidPage(
              h2("Timeline"),
@@ -223,14 +223,6 @@ ui <- navbarPage(
              fluidRow(
                column(12, echarts4rOutput("line_plot"))
              )
-           )
-  ),
-  
-  tabPanel("Text Mining Info",
-           fluidPage(
-             h2("Text Mining Info"),
-             p("Explain text mining methods or results."),
-             p("Explaining text mining methods or results.")
            )
   ),
   
@@ -264,32 +256,141 @@ ui <- navbarPage(
              )
            )
   ),
-  tabPanel("Modeling",
-           tabsetPanel(
-    tabPanel("Predicting Employment Outcomes",
-             fluidPage(
-               withMathJax(),
-               h2("Using SIPP Dataset to find factors of Employment"),
-               
-               )
+  
+
+# Joshua Stuff ------------------------------------------------------------
+
+  
+  navbarMenu("Modeling",
+             tabPanel("Variables Important to Female Employment",
+                      fluidPage(
+                        h2("Variables Important to Female Employment"),
+                        sidebarLayout(
+                          sidebarPanel(
+                            h4("Methodology"),
+                            p("Describe your regression model, data sources, and sample size."),
+                            tags$ul(
+                              tags$li("Survey data from CPS and SIPP"),
+                              tags$li("DiD model with robust standard errors"),
+                              tags$li("Controls: age, education, number of children")
+                            )
+                          ),
+                          mainPanel(
+                            h4("Regression Output"),
+                            br(),
+                          )
+                        )
+                      )
              ),
-    tabPanel("Machine Learning Model",
-             fluidPage(
-               h2("Implications"),
-               p("Describe your models or predictions."),
-               p("Describing the models or predictions.")
-               ), 
+             tabPanel("Predicting Employment Outcomes",
+                      fluidPage(
+                        h2("Predicting Employment Outcomes"),
+                        sidebarLayout(
+                          sidebarPanel(
+                            div(
+                              style = "position: sticky; top: 80px;",
+                              h4(tags$strong("Methodology")),
+                              p("Using Ordinary Least Squares, we analyzed the Survey of Income and Program Participation"),
+                              tags$ul(
+                                tags$li("National Survey data from 2020 - 2023"),
+                                tags$li("Filtered for households with at least one child under the age of 5"),
+                                tags$li("Welfare or SS variable was used as a proxy for subsidy")
+                              ),
+                              img(
+                                src = "images/chart1.png",
+                                width = "100%",
+                                style = "border:1px solid #ccc; border-radius:8px;",
+                                alt = "Key Predictors of Employment Chart"
+                              )
+                            )
+                          ),
+                          
+                          mainPanel(
+                            h4(tags$strong("Model Equation (OLS with Controls)")),
+                            withMathJax(
+                              helpText("$$
+\\begin{aligned}
+\\text{Employment}_{i,t} &= \\beta_0 + \\beta_1 \\text{Female}_{i,t} + \\beta_2 \\text{Childcare}_i + \\beta_3 \\text{NonMetro}_{i,t} \\\\
+&\\quad + \\beta_4 \\text{WelfareorSS}_{i,t} + \\beta_5 \\text{(NonMetro * Childcare)}_{i,t} \\\\
+&\\quad + \\text{Controls}_{i,t} \\boldsymbol{\\gamma} + \\epsilon_{i,t}
+\\end{aligned}
+$$")
+                            ),
+                            br(),
+                            h4(tags$strong("Key Variables (OLS with Controls)")),
+                            htmlOutput("SIPPKey"),
+                            tags$div(
+                              style = "margin-top: -15px; ; font-size: 0.9em; font-style: italic; font-family: 'Times New Roman', Times, serif;",
+                              HTML("Note: <b>+</b> p &lt; 0.1;&nbsp; <b>*</b> p &lt; 0.05;&nbsp; <b>**</b> p &lt; 0.01;&nbsp; <b>***</b> p &lt; 0.001")
+                            ),
+                            br(),
+                            h4(tags$strong("Controls (OLS with Controls)")),
+                            htmlOutput("SIPPControls"),
+                            tags$div(
+                              style = "margin-top: -15px; ; font-size: 0.9em; font-style: italic; font-family: 'Times New Roman', Times, serif;",
+                              HTML("Note: <b>+</b> p &lt; 0.1;&nbsp; <b>*</b> p &lt; 0.05;&nbsp; <b>**</b> p &lt; 0.01;&nbsp; <b>***</b> p &lt; 0.001")
+                            )
+                            
+                          )
+                        )
+                      )
              ),
-    tabPanel("CPS Model",
-             fluidPage(
-               withMathJax(),
-               h2("Implications"),
-               p("Describe your models or predictions."),
-               p("Describing the models or predictions.")
-               ),
-             ),
-    ),
-    ),
+             tabPanel("Machine Learning Model",
+                      fluidPage(
+                        h2("Machine Learning Model"),
+                        sidebarLayout(
+                          sidebarPanel(
+                            h4("Methodology"),
+                            p("Describe your regression model, data sources, and sample size."),
+                            tags$ul(
+                              tags$li("Survey data from CPS and SIPP"),
+                              tags$li("DiD model with robust standard errors"),
+                              tags$li("Controls: age, education, number of children")
+                            )
+                          ),
+                          mainPanel(
+                            h4("Regression Output"),
+                            DT::dataTableOutput("regression_table"),
+                            br(),
+                            
+                            )
+                          )
+                        )
+                      ),
+             tabPanel("Fixed Effects Differences-in-Differences Model",
+                      fluidPage(
+                        h2("Fixed Effects Differences-in-Differences Model"),
+                        sidebarLayout(
+                          sidebarPanel(
+                            h4("Methodology"),
+                            p("Describe your regression model, data sources, and sample size."),
+                            tags$ul(
+                              tags$li("Survey data from CPS and SIPP"),
+                              tags$li("DiD model with robust standard errors"),
+                              tags$li("Controls: age, education, number of children")
+                            )
+                          ),
+                          mainPanel(
+                            h4("Regression Output"),
+                            DT::dataTableOutput("regression_table"),
+                            br(),
+                            h4("Model Equation"),
+                            withMathJax(
+                              helpText("$$
+            Employment_{it} = \\beta_0 + \\beta_1 Childcare_{it} + \\beta_2 Female_i +
+            \\beta_3 NonMetro_{it} + \\beta_4 Welfare_{it} + \\epsilon_{it}
+          $$")
+                            )
+                          )
+                        )
+                      )
+    )
+  ),
+
+
+# End of Joshua Section ---------------------------------------------------
+
+
   tabPanel("About Us",
            fluidPage(
              div(
@@ -501,6 +602,102 @@ server <- function(input, output, session) {
     
     p
   })
+  
+
+# Joshua Tables -----------------------------------------------------------
+  
+    output$SIPPKey <- renderUI({
+      SIPPKey <- data.frame(
+        Variables = c("Intercept","Female", "ChildCare", "NonMetro" , "WelfareorSS", "NonMetro x ChildCare"),
+        Coefficients = c(0.898,-0.117,0.096, -0.021, -.030, 0.121),
+        `P-Value` = c("2e-16***","1.43e-11***","5.80e-08***", "2e-16***","0.151","0.011*"),
+        Interpretation = c(
+          "The baseline employment likliehood in the dataset was 89.81%",
+          "Women have a 11.7% lower likliehood of employment compared to men",
+          "Usage of Childcare increased employment likliehood by 9.6%",
+          "Non-Metro status was associated with a 2.1% decrease in employment",
+          "Usage of Welfare or Social Security lead to a 3% decrease in employment outcomes (Not significnat)",
+          "Childcare usage in Non-Metro areas was associated with a significant 12.1% increase in employment"
+        )
+      )
+      
+      html_table <- SIPPKey %>%
+        kable(
+          format = "html",
+          align = "lcc",
+          col.names = c("Variables", "Coefficients", "P-Value", "Interpretation"),
+          table.attr = 'style="border: 2px solid black; border-collapse: separate; border-spacing: 0;"'
+        ) %>%
+        kable_styling(
+          bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+          full_width = FALSE,
+          position = "center"
+        ) %>%
+        column_spec(3, width = "120px")  
+      HTML(html_table)
+      
+    })
+  
+  output$SIPPControls <- renderUI({
+    SIPPControls <- data.frame(
+      Variables = c(
+        "Single Family",
+        "Education: Graduate or Professional Degree",
+        "Education: High School or Some College",
+        "Education: No High School Diploma",
+        "Parent Age",
+        "Race: Asian",
+        "Race: Black",
+        "Race: Residual",
+        "Kids Under 5: 2",
+        "Kids Under 5: 3",
+        "Kids Under 5: 4"
+      ),
+      Coefficients = c(0.069,
+                       0.032,-0.108,-0.262,
+                       0.002,
+                       -0.138, 0.126,-0.011,
+                       -0.066,-0.159,-0.140),
+      `P-Value` = c(
+        "8.23e-13***",
+        ".085+", "2e-16***", "2e-16***",
+        ".006**",
+        "1.47e-09***","2e-16***","0.559",
+        "3.29e-11***", "7.31e-12***","0.006**"
+      ),
+      Interpretation = c(
+        "Single Parents have a 6.9% higher likliehood of employment",
+        "Graduate or Professional degree holders have a 3.2% higher likiehood of employment compared to a bachelors",
+        "High School degree holders have a 10.8% lower chance of employment compared to a bachelors",
+        "No HS degree holders have a 26.2% lower likliehood of employment compared to a bachelors",
+        "Each additional year in parental age is associated with a 0.2% increase in employment likelihood",
+        "Asians have a 13.8% lower chance of employment compared to whites",
+        "Blacks have a 12.6% higher chance of employment compared to whites",
+        "Individual in the residual race group have a 9.2% higher chance of employment compared to whites",
+        "Parents with 2 kids under 5 have a 5.9% lower chance of employment",
+        "Parents with 3 kids under 5 have a 14.4% lower chance of employment",
+        "Parents with 4 kids under 5 have a 10.5% higher chance of employment"
+      )
+    )
+    
+    html_table <- SIPPControls %>%
+      kable(
+        format = "html",
+        align = "lcc",
+        col.names = c("Variables", "Coefficients", "P-Value", "Interpretation"),
+        table.attr = 'style="border: 2px solid black; border-collapse: separate; border-spacing: 0;"'
+      ) %>%
+      kable_styling(
+        bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+        full_width = FALSE,
+        position = "center"
+      ) %>%
+      column_spec(3, width = "120px")  
+    HTML(html_table)
+    
+  })
+
+    
 }
 # Run App -----------------------------------------------------------------
 shinyApp(ui = ui, server = server)
