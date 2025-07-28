@@ -311,15 +311,24 @@ navbarMenu("Modeling",
                               tags$li("Filtered for households with at least one child under the age of 5"),
                               tags$li("Welfare or SS variable was used as a proxy for subsidy")
                             ),
-                            img(
-                              src = "images/chart1.png",
-                              width = "100%",
-                              style = "border:1px solid #ccc; border-radius:8px;",
-                              alt = "Key Predictors of Employment Chart"
+                            p("We find positive impacts of using childcare, espeically in rural areas, however we find a negative impact of 
+                              Welfare or Social Security. This may be because of the imprecise nature of our variable, biasing our coeficcients toward 0, as well as
+                              a nonrepresentative sample. This motivates us to further explore the impact of subsidy through a Differences-in-Differences Model"),
+                            
+                            tags$figure(
+                              img(
+                                src = "images/chart1.png",
+                                width = "100%",
+                                style = "border:1px solid #ccc; border-radius:8px;",
+                                alt = "Key Predictors of Employment Chart"
+                              ),
+                              tags$figcaption(
+                                style = "font-size: 0.9em; color: #555; text-align: center; margin-top: 5px;",
+                                "Figure: Coefficient Chart" 
+                              )
                             )
                           )
                         ),
-                        
                         mainPanel(
                           h4(tags$strong("Model Equation (OLS with Controls)")),
                           withMathJax(
@@ -355,17 +364,40 @@ $$")
                       h2("Machine Learning Model"),
                       sidebarLayout(
                         sidebarPanel(
-                          h4("Methodology"),
-                          p("Describe your regression model, data sources, and sample size."),
+                          h4(tags$strong("Methodology")),
+                          p("Income and employment status are endogenous, as 
+                            individuals may make choices, such as working additional 
+                            hours or declining a promotion, 
+                            that affect their subsidy eligibility. 
+                            To address this endogeneity, we developed five 
+                            different machine learning models to predict the income 
+                            group each individual would likely belong to. Among these models, 
+                            we selected the Random Forest model for our analysis, as it achieved the
+                            highest accuracy and kappa score. 
+                            Kappa measures the agreement between predicted and actual classifications,
+                            adjusted for chance. A kappa score above 0.60 is generally considered good, with values above 0.80 indicating strong agreement."),
                           tags$ul(
-                            tags$li("Survey data from CPS and SIPP"),
-                            tags$li("DiD model with robust standard errors"),
-                            tags$li("Controls: age, education, number of children")
+                            tags$li("Classifcation and Regression Tree (CART): A decision tree algorithm that splits data into branches to predict outcome."),
+                            tags$li("Linear Discriminant Analysis (LDA): A linear classifier that separates classes by maximizing variance between them"),
+                            tags$li("Support Vector Machine (SVM): Identifies the optimal boundary (hyperplane) that best separates classes"),
+                            tags$li("k-Nearest Neighbors (kNN): Classifies based on the majority vote among the k closest data points"),
+                            tags$li("Random Forest (RF): An ensemble of decision trees that boosts accuracy by averaging many trees.")
                           )
                         ),
                         mainPanel(
-                          h4("Regression Output"),
-                          DT::dataTableOutput("regression_table"),
+                          h4(tags$strong("Regression Output")),
+                          tags$figure(
+                            img(
+                              src = "images/MachineLearningModel.png",
+                              width = "100%",
+                              style = "border:1px solid #ccc; border-radius:8px;",
+                              alt = "Key Predictors of Employment Chart"
+                            ),
+                            tags$figcaption(
+                              style = "font-size: 0.9em; color: #555; text-align: center; margin-top: 5px;",
+                              "Figure: Machine Learning Model Results" 
+                            )
+                          ),
                           br(),
                           
                         )
@@ -377,30 +409,44 @@ $$")
                       h2("Fixed Effects Differences-in-Differences Model"),
                       sidebarLayout(
                         sidebarPanel(
-                          h4("Methodology"),
-                          p("Describe your regression model, data sources, and sample size."),
-                          tags$ul(
-                            tags$li("Survey data from CPS and SIPP"),
-                            tags$li("DiD model with robust standard errors"),
-                            tags$li("Controls: age, education, number of children")
-                          )
+                          h4(tags$strong("Methodology")),
+                          p("To isolate the impact of subsidy usage on employment, 
+                            we implemented a Difference-in-Differences model leveraging Virginia’s 
+                            July 2022 expansion of Child Care Development Fund eligibility, from 65% to 85% of the State Median Income.
+                            Using data from the Current Population Survey spanning 2019 to 2025, we focused on Virginia households with 
+                            children under the age of five. We also incorporated household, month, and year fixed effects to control for
+                            time-invariant and temporal factors."),
                         ),
                         mainPanel(
-                          h4("Regression Output"),
-                          DT::dataTableOutput("regression_table"),
-                          br(),
-                          h4("Model Equation"),
+                          h4(tags$strong("Model Equation")),
                           withMathJax(
                             helpText("$$
-            Employment_{it} = \\beta_0 + \\beta_1 Childcare_{it} + \\beta_2 Female_i +
-            \\beta_3 NonMetro_{it} + \\beta_4 Welfare_{it} + \\epsilon_{it}
-          $$")
+\\begin{aligned}
+\\text{Employment}_{i,t} &= \\beta_0 + \\beta_1 \\, \\text{Predicted_Subsidy}_{i,t} + \\beta_2 \\, \\text{Post}_{i,t} \\\\
+&\\quad + \\beta_3 \\, (\\text{Predicted_Subsidy} \\times \\text{Post})_{i,t} + \\text{Controls}_{i,t} \\boldsymbol{\\gamma} \\\\
+&\\quad + \\alpha_{\\text{household(FE)}(i)} + \\delta_{\\text{month(FE)}(t)} + \\theta_{\\text{year(FE)}(t)} + \\epsilon_{i,t}
+\\end{aligned}
+$$")
+                          ),
+                            br(),
+                            h4(tags$strong("Key Variables")),
+                            htmlOutput("CPSKey"),
+                            tags$div(
+                              style = "margin-top: -15px; ; font-size: 0.9em; font-style: italic; font-family: 'Times New Roman', Times, serif;",
+                              HTML("Note: <b>+</b> p &lt; 0.1;&nbsp; <b>*</b> p &lt; 0.05;&nbsp; <b>**</b> p &lt; 0.01;&nbsp; <b>***</b> p &lt; 0.001")
+                            ),
+                            br(),
+                            h4(tags$strong("Controls")),
+                            htmlOutput("CPSControls"),
+                            tags$div(
+                              style = "margin-top: -15px; ; font-size: 0.9em; font-style: italic; font-family: 'Times New Roman', Times, serif;",
+                              HTML("Note: <b>+</b> p &lt; 0.1;&nbsp; <b>*</b> p &lt; 0.05;&nbsp; <b>**</b> p &lt; 0.01;&nbsp; <b>***</b> p &lt; 0.001")
+                            )
+                            
                           )
                         )
                       )
-                    )
-           )
-),
+                    )),
 
   #ABOUT US-------
   tabPanel("About Us",
@@ -860,6 +906,112 @@ server <- function(input, output, session) {
     HTML(html_table)
     
   })
+  
+  
+  output$CPSKey <- renderUI({
+    CPSKey <- data.frame(
+        Variables = c(
+          "predicted_subsidyNewly_Eligible", 
+          "Post", 
+          "Newly Eligible × Post"
+        ),
+        Coefficients = c(
+         0.054, 0.007, 0.099
+        ),
+        P_Value = c(
+          "0.170", "0.875", "0.0468*"
+        ),
+        Interpretation = c(
+          "Newly-Eligible households were 5.4% more likely to be employed (pre-period)",
+          "Post-period dummy had no significant effect by itself",
+          "Newly-Eligible households saw a 9.9% employment increase post-policy"
+        )
+        )
+    
+    html_table <- CPSKey %>%
+      kable(
+        format = "html",
+        align = "lcc",
+        col.names = c("Variables", "Coefficients", "P-Value", "Interpretation"),
+        table.attr = 'style="border: 2px solid black; border-collapse: separate; border-spacing: 0;"'
+      ) %>%
+      kable_styling(
+        bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+        full_width = FALSE,
+        position = "center"
+      ) %>%
+      column_spec(3, width = "120px")  
+    HTML(html_table)
+    
+  })
+  
+  output$CPSControls <- renderUI({
+    CPSControls <- data.frame(
+        Variables = c(
+          "predicted_subsidyNever_Eligible", 
+          "AGE", 
+          "NCHLT5", 
+          "Married", 
+          "Female", 
+          "Race: American Indian", 
+          "Race: Asian or Pacific Islander", 
+          "Race: Black", 
+          "Race: White", 
+          "Rural", 
+          "Education: Graduate/Prof Degree", 
+          "Education: HS", 
+          "Education: No HS", 
+          "Education: Some College", 
+          "Never Eligible × Post"
+        ),
+        Coefficients = c(
+          0.118, 0.005, -0.063,
+          0.003, -0.188, -0.010, -0.122, -0.094,
+          -0.063, -0.045, 0.035, -0.193, -0.224,
+          -0.193, 0.029
+        ),
+        P_Value = c(
+          "0.026*", "0.101", "0.0002***",
+          "0.944", "<2e-16***", "0.980", "0.173", "0.318",
+          "0.356", "2.53e-08***", "0.237", "5.57e-05***", "0.0057**",
+          "1.04e-06***", "0.509" 
+        ),
+        Interpretation = c(
+          "Never-Eligible households were 11.8% more likely to be employed (pre-period)",
+          "Each year of age slightly increased employment probability",
+          "Having a child under 5 decreased employment by 6.3%",
+          "Marriage had no significant impact on employment",
+          "Females were 18.8% less likely to be employed than males",
+          "No significant effect for American Indian category",
+          "Asian/Pacific Islanders showed a non-significant decrease in employment",
+          "Black individuals had lower employment, but not significantly",
+          "White individuals also had lower employment (not significant)",
+          "Living in a rural area decreased employment by 4.5%",
+          "Graduate/Professional degrees showed a modest, non-significant boost",
+          "High school education reduced employment likelihood significantly",
+          "No HS reduced employment likelihood by 22.4%",
+          "Some college reduced employment likelihood by 19.3%",
+          "No significant interaction effect for Never-Eligible post-period"
+        )
+    )
+    
+    html_table <- CPSControls %>%
+      kable(
+        format = "html",
+        align = "lcc",
+        col.names = c("Variables", "Coefficients", "P-Value", "Interpretation"),
+        table.attr = 'style="border: 2px solid black; border-collapse: separate; border-spacing: 0;"'
+      ) %>%
+      kable_styling(
+        bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+        full_width = FALSE,
+        position = "center"
+      ) %>%
+      column_spec(3, width = "120px")  
+    HTML(html_table)
+    
+  })
+  
 
     
 }

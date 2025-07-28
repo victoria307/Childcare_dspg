@@ -281,7 +281,7 @@ summary(EMPIV, diagnostics = TRUE)
 
 #Mako for Website (G) and rocket for Poster
 plot_summs(EMPBasic, EMP1, EMP2, EMPIV,
-           colors = viridis_pal(option = "rocket")(6)[c(1, 3, 4, 5)],
+           colors = viridis_pal(option = "G")(6)[c(1, 3, 4, 5)],
            model.names = c("OLS", "OLS with Controls", 
                            "OLS With Child Interactions", "IV"),
            coefs = c("Female", "ChildCare", "WelfareorSS", 
