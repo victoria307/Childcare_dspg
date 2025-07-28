@@ -198,7 +198,23 @@ ui <- navbarPage(
                  )
                )
              ),
-             br()
+             br(),
+             tags$div(
+               style = "font-size:12px; text-align:left; margin-top:20px;",
+               strong("Sources:"),
+               tags$ul(
+                 tags$li(tags$a(href = "https://pmc.ncbi.nlm.nih.gov/articles/PMC10575474/",
+                                "Access to Early Care and Education in Rural Communities: Implications for Children’s School Readiness", target = "_blank")),
+                 tags$li(tags$a(href = "https://vachildcare.com/why-is-early-childhood-education-important/your-child-care-search/financial-assistance/",
+                                "Financial Assistance - Child Care Aware of Virginia", target = "_blank")),
+                 tags$li(tags$a(href = "https://www.childcare.virginia.gov/families/paying-for-child-care",
+                                "Paying for Child Care | Child Care VA", target = "_blank")),
+                 tags$li(tags$a(href = "https://www.americanprogress.org/article/child-care-crisis-keeping-women-workforce/#:~:text=According%20to%20the%20poll%2C%20slightly,important%20benefits%20and%20workplace%20supports",
+                                "The Child Care Crisis Is Keeping Women Out of the Workforce - Center for American Progress", target = "_blank")),
+                 tags$li(tags$a(href = "https://bipartisanpolicy.org/blog/understanding-childcare-challenges-in-rural-america/https://www.ntca.org/sites/default/files/documents/2024-10/understanding-childcare-challenges-in-rural-america.pdf",
+                                "Understanding Childcare Challenges in Rural America", target = "_blank")),
+                
+               ))
            )
   ),
   
@@ -212,13 +228,13 @@ ui <- navbarPage(
   
   tabPanel("Understanding Policy",
            fluidPage(
-             h2("Timeline"),
              titlePanel("Virginia Childcare Policy Timeline"),
+             p("Childcare is drastically shaped by the policies that surround it, especially when it comes to policies regarding childcare subsidies. Below is an interactive timeline that displays major policy changes from 2018 to now that impact childcare subsidies. To see the primary source click on the hyperlink in the document description."),
              fluidRow(
                column(8, timevisOutput("timeline")),
                column(4, uiOutput("policyDetails"))
              ),
-             p("Click a policy event on the timeline above to see where it falls—highlighted by a yellow line—on the chart of total children receiving subsidies from 2018 to 2025."),
+             p("Below is a line graph depicting total count of children on childcare subsidies. Click a policy event on the timeline above to see where it falls, highlighted by a yellow line, on the chart."),
              br(),
              fluidRow(
                column(12, echarts4rOutput("line_plot"))
@@ -270,6 +286,8 @@ ui <- navbarPage(
              fluidPage(
                withMathJax(),
                h2("Using SIPP Dataset to find factors of Employment"),
+               img(src = "images/chart1.png", height = "200px"),
+               br()
                
                )
              ),
@@ -290,6 +308,7 @@ ui <- navbarPage(
              ),
     ),
     ),
+  #ABOUT US-------
   tabPanel("About Us",
            fluidPage(
              div(
@@ -297,10 +316,12 @@ ui <- navbarPage(
                div(
                  style = "text-align: center; max-width: 900px;",
                  
+                 # --- Header ---
                  h2("About Us", style = "font-size:38px; font-weight:bold; margin-bottom:10px;"),
                  
                  p(HTML('Data Science for the Public Good (DSPG) Young Scholars program is an intensive summer program hosted by the Virginia Tech Department of Agricultural and Applied Economics and the Virginia Cooperative Extension Service. This summer marks five years of the immersive ten-week program enabling students from a variety of colleges and universities to have hands-on educational experience working with data analysis, statistics, R coding, and the social sciences. These skills are applied to real-world social issues via team-based research projects to enable students to utilize data for real-world issues such as policy, industry, academic research, and community engagement. For more information on the program, other teams\' research, and information on how to apply, visit the official <a href="https://aaec.vt.edu/academics/undergraduate/dspg.html" target="_blank">VT DSPG site</a>.')),
                  
+                 # --- Undergraduate Fellows ---
                  h3("Undergraduate Fellows", style ="font-size:32px; font-weight:bold; margin-top:0px"),
                  fluidRow(
                    column(
@@ -313,7 +334,6 @@ ui <- navbarPage(
                          p("Berea College '27", style = "font-size:14px; color:#333333; margin-top:0px; margin-bottom:0px;"), 
                          p("Sociology", style = "font-size:14px; color:#333333; margin-top:0px;") )
                    ),
-                   
                    column(
                      width = 4,
                      div(style = "text-align:center;",
@@ -324,7 +344,6 @@ ui <- navbarPage(
                          p("Berea College '26", style = "font-size:14px; color:#333333; margin-top:0px; margin-bottom:0px;"),
                          p("Computer Science", style = "font-size:14px; color:#333333; margin-top:0px;") )
                    ),
-                   
                    column(
                      width = 4,
                      div(style = "text-align:center;",
@@ -338,10 +357,12 @@ ui <- navbarPage(
                    )
                  ),
                  
+                 # --- Graduate Fellow Centered ---
                  h3("Graduate Fellow", style ="font-size:32px; font-weight:bold; margin-top:30px"),
                  fluidRow(
+                   column(width = 4), # empty for centering
                    column(
-                     width = 12,
+                     width = 4,
                      div(style = "text-align:center;",
                          img(src = "images/xiaoyi.jpeg", height = "200px", style = "border-radius: 50%; margin-bottom: 10px;"),
                          br(),
@@ -350,12 +371,150 @@ ui <- navbarPage(
                          p("Virginia Tech", style = "font-size:14px; color:#333333; margin-top:0px; margin-bottom:0px;"), 
                          p("Applied Agriculture and Economics", style = "font-size:14px; color:#333333; margin-top:0px;")
                      )
+                   ),
+                   column(width = 4) # empty for centering
+                 ),
+                 
+                 # --- Faculty ---
+                 h3("Faculty", style="font-size:32px; font-weight:bold; margin-top:30px"),
+                 fluidRow(
+                   column(
+                     width = 4,
+                     div(style = "text-align:center;",
+                         img(src = "images/wang.png", height = "200px",
+                             style = "border-radius: 50%; margin-bottom: 10px;"),
+                         br(),
+                         tags$a("Dr. Le Wang", href = "https://www.linkedin.com/in/le-wang-872aa529/", target = "_blank",
+                                style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"),
+                         p("Virginia Tech", style = "font-size:14px; color:#333333; margin-top:0px; margin-bottom:0px;"),
+                         p("David M. Kohl Chair & Professor; Director, Kohl Centre and DSPG Program", 
+                           style = "font-size:14px; color:#333333; margin-top:0px; margin-bottom:0px;")
+                     )
+                   ),
+                   column(
+                     width = 4,
+                     div(style = "text-align:center;",
+                         img(src = "images/bradburn.jpg", height = "200px",
+                             style = "border-radius: 50%; margin-bottom: 10px;"),
+                         br(),
+                         tags$a("Dr. Isabel Bradburn", href = "https://www.linkedin.com/in/isabel-bradburn-3418a964/", target = "_blank",
+                                style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"),
+                         p("Virginia Tech", style = "font-size:14px; color:#333333; margin-top:0px; margin-bottom:0px;"),
+                         p("Research Director, Child Development Center for Learning & Research", 
+                           style = "font-size:14px; color:#333333; margin-top:0px; margin-bottom:0px;")
+                     )
+                   ),
+                   column(
+                     width = 4,
+                     div(style = "text-align:center;",
+                         img(src = "images/Chunbe.png", height = "200px",
+                             style = "border-radius: 50%; margin-bottom: 10px;"),
+                         br(),
+                         tags$a("Dr. Chunbei Wang", href = "https://www.linkedin.com/in/chunbei-wang-2242a0126/", target = "_blank",
+                                style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"),
+                         p("Virginia Tech", style = "font-size:14px; color:#333333; margin-top:0px; margin-bottom:0px;"),
+                         p("Associate Professor & Graduate Program Director", 
+                           style = "font-size:14px; color:#333333; margin-top:0px; margin-bottom:0px;")
+                     )
                    )
                  )
                )
              )
            )
+  ),
+
+  tabPanel("Acknowledgements",
+           fluidPage(
+             div(
+               style = "max-width: 1000px; margin: auto;",  # wrapper for everything
+               
+               # --- Centered Title ---
+               h2("Data", style = "text-align:center; margin-bottom:20px;"),
+               
+               # --- Flex container for all data blocks ---
+               div(
+                 style = "display: flex; flex-direction: column; gap: 30px; text-align:left;",
+            
+               
+               # --- Flex container for all data blocks ---
+               div(
+                 style = "display: flex; flex-direction: column; gap: 30px;",
+                 
+                 # --- CPS ---
+                 div(
+                   style = "display: flex; align-items: flex-start; gap: 20px;",
+                   img(src = "images/CPS.avif", height = "120px", style = "flex-shrink:0;"),
+                   div(
+                     tags$a(
+                       "Current Population Survey",
+                       href = "https://www.census.gov/programs-surveys/cps.html",
+                       target = "_blank",
+                       style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"
+                     ),
+                     p('"The Current Population Survey (CPS) is sponsored by both the U.S. Census Bureau and the U.S. Bureau of Labor Statistics (BLS), and is the primary source of labor force statistics for the population of the USA."- Taken from the CPS website.',
+                       style = "font-size:14px; color:#333333; margin-top:5px;")
+                   )
+                 ),
+                 
+                 # --- NDCP ---
+                 div(
+                   style = "display: flex; align-items: flex-start; gap: 20px;",
+                   img(src = "images/ndcp.png", height = "120px", style = "flex-shrink:0;"),
+                   div(
+                     tags$a(
+                       "National Database of Childcare Prices",
+                       href = "https://www.dol.gov/agencies/wb/topics/featured-childcare",
+                       target = "_blank",
+                       style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"
+                     ),
+                     p('"The National Database of Childcare Prices (NDCP) is the most comprehensive federal source of childcare prices at the county level. The database offers childcare price data by childcare provider type, age of children, and county characteristics. Data are available from 2008 through 2022."-Taken from NCDP',
+                       style = "font-size:14px; color:#333333; margin-top:5px;")
+                   )
+                 ),
+                 
+                 # --- SIPP ---
+                 div(
+                   style = "display: flex; align-items: flex-start; gap: 20px;",
+                   img(src = "images/SIPP.png", height = "120px", style = "flex-shrink:0;"),
+                   div(
+                     tags$a(
+                       "Survey of Income and Program Participation",
+                       href = "https://www.census.gov/programs-surveys/sipp.html",
+                       target = "_blank",
+                       style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"
+                     ),
+                     p('"SIPP is a nationally representative longitudinal survey that provides comprehensive information on the dynamics of income, employment, household composition, and government program participation. SIPP is also a leading source of data on economic well-being, family dynamics, education, wealth, health insurance, child care, and food security. The survey interviews individuals for several years and provides monthly data about changes in household and family composition and economic circumstances over time."-Taken from the SIPP website',
+                       style = "font-size:14px; color:#333333; margin-top:5px;")
+                   )
+                 ),
+                 
+                 # --- VDOE ---
+                 div(
+                   style = "display: flex; align-items: flex-start; gap: 20px;",
+                   img(src = "images/VDOE.jpg", height = "120px", style = "flex-shrink:0;"),
+                   div(
+                     tags$a("Virginia Department of Education",
+                            style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"),
+                     p("Special thanks to the Virginia Department of Education (VDOE) for consulting with our team and providing data on expenditures and total count of children on subsidies by county in the state of Virginia.",
+                       style = "font-size:14px; color:#333333; margin-top:5px;")
+                   )
+                 )
+               ),
+               
+               # --- Final text at the bottom ---
+               div(
+                 style = "margin-top:30px; text-align:center;",
+                 p(
+                   tags$b(
+                     "This work is supported by the U.S. Department of Agriculture, National Institute of Food and Agriculture as part of the DATA-ACRE program [grant no. 2022-67037-36639 / project accession no. 2021-10424]."
+                   ),
+                   style = "font-size:14px; color:#333333;"
+                 )
+               )
+             )
+           )
   )
+)
 )
 
 # Server ------------------------------------------------------------------
@@ -444,19 +603,29 @@ server <- function(input, output, session) {
     }
   })
   
-  # TIMELINE AND GRAPH BELOW
   output$line_plot <- renderEcharts4r({
+    # Summarise by Rural/Urban
     rural_urban_by_date <- VDOE_data %>%
       group_by(date, Urban.y) %>%
       summarise(Total_Count = sum(Total_Count, na.rm = TRUE), .groups = "drop") %>%
       mutate(Urban.y = ifelse(Urban.y == 1, "Urban", "Rural"))
     
-    p <- rural_urban_by_date %>%
+    # Calculate total (Rural + Urban)
+    total_by_date <- rural_urban_by_date %>%
+      group_by(date) %>%
+      summarise(Total_Count = sum(Total_Count), .groups = "drop") %>%
+      mutate(Urban.y = "Total")
+    
+    # Combine data
+    combined_data <- bind_rows(rural_urban_by_date, total_by_date)
+    
+    # Build chart
+    p <- combined_data %>%
       group_by(Urban.y) %>%
       e_charts(date) %>%
-      e_line(Total_Count, name = NULL) %>%
+      e_line(Total_Count, name = ~Urban.y) %>%
       e_tooltip(trigger = "axis") %>%
-      e_legend(right = 10) %>%
+      e_legend(show = TRUE, right = 10) %>%
       e_x_axis(
         type = "time",
         name = "Date",
@@ -468,6 +637,7 @@ server <- function(input, output, session) {
       e_title("Total Count of Children on Subsidies Over Time (Rural vs Urban)") %>%
       e_datazoom(type = "slider", start = 0, end = 100)
     
+    # Add vertical dashed lines for policies
     for (d in as.Date(policy_data$start)) {
       p <- p %>%
         e_mark_line(
@@ -477,6 +647,7 @@ server <- function(input, output, session) {
         )
     }
     
+    # Highlight selected range
     if (!is.null(selected_range())) {
       range <- selected_range()
       p <- p %>%
@@ -501,6 +672,9 @@ server <- function(input, output, session) {
     
     p
   })
+  
+  
+  
 }
 # Run App -----------------------------------------------------------------
 shinyApp(ui = ui, server = server)
