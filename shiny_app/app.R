@@ -245,7 +245,6 @@ ui <- navbarPage(
   tabPanel("Maps",
            fluidPage(
              h2("Maps"),
-             p("Insert your map visualizations."),
              h2("Virginia Childcare Costs as a Percent of Annual Family Income"),
              sidebarLayout(
                sidebarPanel(
@@ -921,7 +920,7 @@ server <- function(input, output, session) {
   output$CPSKey <- renderUI({
     CPSKey <- data.frame(
         Variables = c(
-          "predicted_subsidyNewly_Eligible", 
+          "predicted_subsidy: Newly_Eligible", 
           "Post", 
           "Newly Eligible × Post"
         ),
@@ -958,7 +957,7 @@ server <- function(input, output, session) {
   output$CPSControls <- renderUI({
     CPSControls <- data.frame(
         Variables = c(
-          "predicted_subsidyNever_Eligible", 
+          "predicted_subsidy: Never_Eligible", 
           "AGE", 
           "NCHLT5", 
           "Married", 
@@ -989,7 +988,7 @@ server <- function(input, output, session) {
         Interpretation = c(
           "Never-Eligible households were 11.8% more likely to be employed (pre-period)",
           "Each year of age slightly increased employment probability",
-          "Having a child under 5 decreased employment by 6.3%",
+          "Each child under 5 decreased employment by 6.3%",
           "Marriage had no significant impact on employment",
           "Females were 18.8% less likely to be employed than males",
           "No significant effect for American Indian category",
