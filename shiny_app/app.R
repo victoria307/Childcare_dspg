@@ -647,7 +647,7 @@ $$")
                    column(
                      width = 4,
                      div(style = "text-align:center;",
-                         img(src = "images/bradburn.jpg", height = "200px",
+                         img(src = "images/Bradburn.jpg", height = "200px",
                              style = "border-radius: 50%; margin-bottom: 10px;"),
                          br(),
                          tags$a("Dr.Isabel Bradburn", href = "https://www.linkedin.com/in/isabel-bradburn-3418a964/", target = "_blank",
@@ -1177,6 +1177,22 @@ server <- function(input, output, session) {
     
     observeEvent(input$county_picker, { selected_counties(input$county_picker) })
     
+    observe({
+      req(input$year2, input$data_type2)
+      
+      valid_choices <- valid_county_choices2()
+      new_selected <- intersect(selected_counties2(), valid_choices)
+      selected_counties2(new_selected)
+      
+      updateSelectizeInput(
+        session,
+        "county_picker2",
+        choices = valid_choices,
+        selected = new_selected
+      )
+    })
+    
+    
     observeEvent(input$reset_counties, {
       selected_counties(character(0))
       updateSelectizeInput(session, "county_picker", selected = character(0))
@@ -1401,6 +1417,17 @@ server <- function(input, output, session) {
     })
     
     # Year-specific map2
+    valid_county_choices2 <- reactive({
+      req(input$year2, input$data_type2)
+      
+      df <- merged_data2()  # this is the map-joined data for the selected year
+      df %>%
+        filter(!is.na(.data[[input$data_type2]])) %>%
+        pull(Locality) %>%
+        unique() %>%
+        sort()
+    })
+    
     output$map2 <- renderLeaflet({
       req(input$data_type2)
       df <- merged_data2()
