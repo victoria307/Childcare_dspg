@@ -10,12 +10,14 @@ library(shinydashboard)
 library(echarts4r)
 library(timevis)  # added for timeline
 library(DT)
+library(plotly)
 library(kableExtra)
-
+library(scales)
+library(RColorBrewer)
 
 options(tigris_use_cache = TRUE)
 
-# Data --------------------------------------------------------------------
+# Cost as % Income --------------------------------------------------------------------
 getwd()
 # Import data
 labor_data <- read_csv("Data/WB Output/VA_data.csv")
@@ -31,6 +33,7 @@ va_counties <- counties(state = "VA", cb = TRUE, class = "sf") %>%
 # Format FIPS codes consistently
 VA_data <- VA_data %>%
   mutate(COUNTY_FIPS_CODE = str_pad(as.character(COUNTY_FIPS_CODE), width = 5, pad = "0"))
+
 
 # Join spatial and attribute data
 map_data_all <- va_counties %>%
@@ -125,7 +128,57 @@ policy_data <- data.frame(
 )
 policy_data$start <- as.character(policy_data$start)
 
+#TC/ expinditures ----------
+# Utility formatters 
+fmt_count <- label_comma(accuracy = 0.1)           # e.g., 1,234.5
+fmt_dollar <- label_dollar(accuracy = 1)           # e.g., $1,234
 
+# Load and Prepare Data 
+childcare_data <- read_excel("Data/Facilities_Count_And_Expenditure copy.xlsx") %>%
+  mutate(
+    year = as.integer(year),
+    Avg_Total_Count = as.numeric(Avg_Total_Count),
+    Avg_Expenditures = as.numeric(Avg_Expenditures)
+  )
+
+# Load FIPS codes for Virginia counties 
+va_fips <- counties(state = "VA", cb = TRUE, class = "sf") %>%
+  st_drop_geometry() %>%
+  select(NAME, GEOID) %>%
+  rename(Locality = NAME, FIPS = GEOID) %>%
+  mutate(FIPS = as.character(FIPS))
+
+# Join FIPS to data
+childcare_data <- childcare_data %>%
+  mutate(Locality = str_trim(Locality)) %>%
+  left_join(va_fips, by = "Locality") %>%
+  mutate(FIPS = as.character(FIPS))
+
+# Load county shapes with FIPS 
+va_shape <- counties(state = "VA", cb = TRUE, class = "sf") %>%
+  mutate(FIPS = as.character(GEOID))
+
+# Define a function to build the bins for map legends 
+map_bins_fn <- function(varname) {
+  if (varname == "Avg_Expenditures") {
+    c(0, 2500, 5000, 7500, 10000, 15000, Inf)
+  } else {
+    c(0, 10, 20, 30, 40, 50, Inf)
+  }
+}
+
+# Custom map color palette (excluding the lightest yellow) 
+map_palette <- RColorBrewer::brewer.pal(7, "YlGnBu")[2:7]
+
+map_bins_fn <- function(var, values) {
+  if (var == "Avg_Total_Count") {
+    return(c(0, 50, 100, 250, 500, 1000, 2000, Inf))
+  } else if (var == "Avg_Expenditures") {
+    return(c(0, 10000, 50000, 100000, 250000, 500000, 1000000, 1500000, 2000000, Inf))
+  } else {
+    return(pretty(values, n = 7))  # fallback for other metrics
+  }
+}
 
 
 
@@ -242,8 +295,9 @@ ui <- navbarPage(
            )
   ),
   
-  tabPanel("Maps",
-           fluidPage(
+  navbarMenu("Maps",
+           tabPanel("Cost as a Percent of Income",
+                    fluidPage(
              h2("Maps"),
              h2("Virginia Childcare Costs as a Percent of Annual Family Income"),
              sidebarLayout(
@@ -271,11 +325,72 @@ ui <- navbarPage(
              )
            )
   ),
+  tabPanel("Total Count on Subsidies & Trends",
+           fluidPage(
+             h2("Childcare Total Count on Subsidies & Expenditures"),
+             p("Use the selectors below to choose the year, data type, or trend metric. Click on counties in the map to select or deselect them. Selected counties will be highlighted and appear in the trend plots below the overall map. Switch between the 'Year-Specific View' and 'Time Trend View' tabs to explore data accordingly."),
+             sidebarLayout(
+               sidebarPanel(
+                 style = "background-color: #d3ebf5;",  # Same style as existing map panel
+                 
+                 # Show Year + Data Type only in year_view
+                 conditionalPanel(
+                   condition = "input.tabs2 == 'year_view2'",
+                   selectInput("year2", "Select Year:", 
+                               choices = sort(unique(childcare_data$year)), 
+                               selected = max(childcare_data$year)),
+                   selectInput("data_type2", "Select Data Type:",
+                               choices = c("Average Total Count" = "Avg_Total_Count",
+                                           "Average Expenditures (USD)" = "Avg_Expenditures"))
+                 ),
+                 
+                 # Show trend variable only in trend_view
+                 conditionalPanel(
+                   condition = "input.tabs2 == 'trend_view2'",
+                   selectInput("trend_var2", "Select a metric to show in time trend:",
+                               choices = c("Total Count" = "Avg_Total_Count",
+                                           "Expenditures (USD)" = "Avg_Expenditures"),
+                               selected = "Avg_Total_Count")
+                 ),
+                 
+                 # County picker and reset button (always visible)
+                 selectizeInput("county_picker2", "Select Counties:", 
+                                choices = sort(unique(childcare_data$Locality)), 
+                                multiple = TRUE),
+                 actionButton("reset_counties2", "Clear Selected Counties", 
+                              class = "btn btn-warning")
+               ),
+               
+               mainPanel(
+                 tabsetPanel(id = "tabs2",
+                             # --- Year-Specific View ---
+                             tabPanel(title = "Year-Specific View", value = "year_view2",
+                                      leafletOutput("map2", height = "600px"),
+                                      br(),
+                                      h4("Selected County Values for Selected Year", 
+                                         style = "font-family:'Times New Roman';"),
+                                      plotlyOutput("year_specific_plot2", height = "400px")
+                             ),
+                             
+                             # --- Time Trend View ---
+                             tabPanel(title = "Time Trend View", value = "trend_view2",
+                                      leafletOutput("trend_map2", height = "600px"),
+                                      h4("Trends Over Time for Selected Counties", 
+                                         style = "font-family:'Times New Roman';"),
+                                      plotlyOutput("multi_county_plot2", height = "400px")
+                             )
+                 )
+               )
+             )
+           )
+  )
+                 )
+              ,
   
 
 # Joshua Stuff ------------------------------------------------------------
 
-navbarMenu("Modeling",
+navbarMenu("Analysis",
            tabPanel("Variables Important to Female Employment",
                     fluidPage(
                       h2("Variables Important to Female Employment"),
@@ -1019,10 +1134,411 @@ server <- function(input, output, session) {
     HTML(html_table)
     
   })
+  #RURAL URBAN MAP------------
+  # Counties selected for new maps
+    
+    # ==============================
+    # 1. Counties selected for original maps (first tab)
+    # ==============================
+    selected_counties <- reactiveVal(character(0))
+    
+    observeEvent(input$map_shape_click, {
+      clicked_fips <- input$map_shape_click$id
+      clicked_name <- childcare_data %>%
+        filter(FIPS == clicked_fips) %>%
+        pull(Locality) %>% unique() %>% first()
+      
+      if (!is.null(clicked_name)) {
+        updated <- if (clicked_name %in% selected_counties()) {
+          setdiff(selected_counties(), clicked_name)
+        } else {
+          union(selected_counties(), clicked_name)
+        }
+        selected_counties(updated)
+        updateSelectizeInput(session, "county_picker", selected = updated)
+      }
+    })
+    
+    observeEvent(input$trend_map_shape_click, {
+      clicked_fips <- input$trend_map_shape_click$id
+      clicked_name <- childcare_data %>%
+        filter(FIPS == clicked_fips) %>% pull(Locality) %>% unique() %>% first()
+      
+      if (!is.null(clicked_name)) {
+        updated <- if (clicked_name %in% selected_counties()) {
+          setdiff(selected_counties(), clicked_name)
+        } else {
+          union(selected_counties(), clicked_name)
+        }
+        selected_counties(updated)
+        updateSelectizeInput(session, "county_picker", selected = updated)
+      }
+    })
+    
+    observeEvent(input$county_picker, { selected_counties(input$county_picker) })
+    
+    observeEvent(input$reset_counties, {
+      selected_counties(character(0))
+      updateSelectizeInput(session, "county_picker", selected = character(0))
+    })
+    
+    # ==============================
+    # 2. Counties selected for new maps (second tab)
+    # ==============================
+    selected_counties2 <- reactiveVal(character(0))
+    
+    observeEvent(input$map2_shape_click, {
+      clicked_fips <- input$map2_shape_click$id
+      clicked_name <- childcare_data %>%
+        filter(FIPS == clicked_fips) %>% pull(Locality) %>% unique() %>% first()
+      
+      if (!is.null(clicked_name)) {
+        updated <- if (clicked_name %in% selected_counties2()) {
+          setdiff(selected_counties2(), clicked_name)
+        } else {
+          union(selected_counties2(), clicked_name)
+        }
+        selected_counties2(updated)
+        updateSelectizeInput(session, "county_picker2", selected = updated)
+      }
+    })
+    
+    observeEvent(input$trend_map2_shape_click, {
+      clicked_fips <- input$trend_map2_shape_click$id
+      clicked_name <- childcare_data %>%
+        filter(FIPS == clicked_fips) %>% pull(Locality) %>% unique() %>% first()
+      
+      if (!is.null(clicked_name)) {
+        updated <- if (clicked_name %in% selected_counties2()) {
+          setdiff(selected_counties2(), clicked_name)
+        } else {
+          union(selected_counties2(), clicked_name)
+        }
+        selected_counties2(updated)
+        updateSelectizeInput(session, "county_picker2", selected = updated)
+      }
+    })
+    
+    observeEvent(input$county_picker2, { selected_counties2(input$county_picker2) })
+    
+    observeEvent(input$reset_counties2, {
+      selected_counties2(character(0))
+      updateSelectizeInput(session, "county_picker2", selected = character(0))
+    })
+    
+    # ==============================
+    # 3. Shared helper functions
+    # ==============================
+    poly_label <- function(df, varname) {
+      val_fmt <- if (varname == "Avg_Expenditures") fmt_dollar else fmt_count
+      paste0("<strong>", df$NAME, "</strong><br/>",
+             ifelse(varname == "Avg_Expenditures", 
+                    "Avg Expenditures: ", "Total Count on Subsidies: "),
+             ifelse(is.na(df[[varname]]), "NA", val_fmt(df[[varname]]))) %>%
+        lapply(htmltools::HTML)
+    }
+    
+    # ==============================
+    # 4. Year-specific maps
+    # ==============================
+    filtered_data_childcare <- reactive({
+      childcare_data %>% filter(year == input$year)
+    })
+    
+    merged_data <- reactive({
+      left_join(va_shape, filtered_data_childcare(), by = "FIPS")
+    })
+    
+    output$map <- renderLeaflet({
+      req(input$data_type)
+      df <- merged_data()
+      var <- input$data_type
+      
+      bins <- map_bins_fn(var, df[[var]])
+      pal <- colorBin(palette = map_palette, domain = df[[var]], bins = bins, na.color = "gray")
+      
+      
+      leaflet(df) %>%
+        addProviderTiles(providers$CartoDB.Positron) %>%
+        addPolygons(
+          layerId = ~FIPS,
+          fillColor = ~pal(get(var)),
+          weight = 1,
+          color = "white",
+          fillOpacity = 0.7,
+          label = poly_label(df, var),
+          labelOptions = labelOptions(direction = "auto"),
+          highlight = highlightOptions(weight = 2, color = "#666", fillOpacity = 0.9)
+        ) %>%
+        addLegend("bottomright", pal = pal, values = df[[var]],
+                  title = ifelse(var == "Avg_Expenditures", 
+                                 "Avg Expenditures", 
+                                 "Total Count on Subsidies"), opacity = 1)
+    })
+    
+    # ==============================
+    # 5. Trend map
+    # ==============================
+    output$trend_map <- renderLeaflet({
+      req(input$trend_var)
+      var <- input$trend_var
+      
+      summary_df <- childcare_data %>%
+        group_by(FIPS) %>%
+        summarise(
+          Avg_Total_Count = mean(Avg_Total_Count, na.rm = TRUE),
+          Avg_Expenditures = mean(Avg_Expenditures, na.rm = TRUE),
+          .groups = "drop"
+        )
+      
+      df <- left_join(va_shape, summary_df, by = "FIPS")
+      bins <- map_bins_fn(var)
+      pal <- colorBin(palette = map_palette, domain = df[[var]], bins = bins, na.color = "gray")
+      
+      leaflet(df) %>%
+        addProviderTiles(providers$CartoDB.Positron) %>%
+        addPolygons(
+          layerId = ~FIPS,
+          fillColor = ~pal(get(var)),
+          weight = 1,
+          color = "white",
+          fillOpacity = 0.7,
+          label = poly_label(df, var),
+          labelOptions = labelOptions(direction = "auto"),
+          highlight = highlightOptions(weight = 2, color = "#666", fillOpacity = 0.9)
+        ) %>%
+        addLegend("bottomright", pal = pal, values = df[[var]],
+                  title = ifelse(var == "Avg_Expenditures", 
+                                 "Avg Expenditures", 
+                                 "Total Count on Subsidies"), opacity = 1)
+    })
+    
+    # ==============================
+    # 6. Year-specific bar plot
+    # ==============================
+    output$year_specific_plot <- renderPlotly({
+      locs <- selected_counties()
+      req(input$data_type)
+      if (length(locs) == 0) return(NULL)
+      
+      df <- childcare_data %>%
+        filter(year == input$year, Locality %in% locs)
+      
+      if (input$data_type == "Avg_Total_Count") {
+        df <- df %>% mutate(hover_txt = paste0(Locality, "<br>Total Count: ", fmt_count(Avg_Total_Count)))
+        y_lab <- "Total Count on Subsidies"
+      } else {
+        df <- df %>% mutate(hover_txt = paste0(Locality, "<br>Expenditures: ", fmt_dollar(Avg_Expenditures)))
+        y_lab <- "Expenditures (USD)"
+      }
+      
+      g <- ggplot(df, aes(x = reorder(Locality, .data[[input$data_type]]), 
+                          y = .data[[input$data_type]], 
+                          fill = Locality,
+                          text = hover_txt)) +
+        geom_col() +
+        labs(
+          title = paste("Selected County", y_lab, "in", input$year),
+          x = "County", y = y_lab
+        ) +
+        scale_fill_manual(values = rep(map_palette, length.out = length(unique(df$Locality)))) +
+        theme_minimal(base_family = "Times New Roman") +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")
+      
+      ggplotly(g, tooltip = "text")
+    })
+    
+    # ==============================
+    # 7. Multi-county trend plot
+    # ==============================
+    output$multi_county_plot <- renderPlotly({
+      locs <- selected_counties()
+      req(input$trend_var)
+      if (length(locs) == 0) return(NULL)
+      
+      plot_data <- childcare_data %>% filter(Locality %in% locs)
+      
+      plot_long <- plot_data %>%
+        select(Locality, year, Avg_Total_Count, Avg_Expenditures) %>%
+        pivot_longer(cols = c("Avg_Total_Count", "Avg_Expenditures"),
+                     names_to = "Metric", values_to = "Value") %>%
+        filter(Metric == input$trend_var) %>%
+        mutate(
+          Metric_label = case_when(
+            Metric == "Avg_Total_Count" ~ "Total Count on Subsidies",
+            Metric == "Avg_Expenditures" ~ "Expenditures (USD)"
+          ),
+          hover_txt = case_when(
+            Metric == "Avg_Total_Count" ~ paste0(Locality, "<br>Year: ", year, "<br>Total Count: ", fmt_count(Value)),
+            Metric == "Avg_Expenditures" ~ paste0(Locality, "<br>Year: ", year, "<br>Expenditures: ", fmt_dollar(Value))
+          )
+        )
+      
+      g <- ggplot(plot_long, aes(x = year, y = Value, color = Locality, group = Locality, text = hover_txt)) +
+        geom_line(size = 1.2, na.rm = TRUE) +
+        geom_point(size = 2, na.rm = TRUE) +
+        labs(
+          title = paste("Trend of", unique(plot_long$Metric_label), "by County"),
+          x = "Year", y = unique(plot_long$Metric_label),
+          color = "County"
+        ) +
+        scale_color_manual(values = rep(map_palette, length.out = length(unique(plot_long$Locality)))) +
+        theme_minimal(base_family = "Times New Roman")
+      
+      ggplotly(g, tooltip = "text") %>% layout(legend = list(orientation = "h", x = 0, y = -0.2))
+    })
+    
+    # ==============================
+    # 8. Duplicate logic for the 2nd tab (map2, trend_map2, plots2)
+    # ==============================
+    
+    filtered_data_childcare2 <- reactive({
+      childcare_data %>% filter(year == input$year2)
+    })
+    
+    merged_data2 <- reactive({
+      left_join(va_shape, filtered_data_childcare2(), by = "FIPS")
+    })
+    
+    # Year-specific map2
+    output$map2 <- renderLeaflet({
+      req(input$data_type2)
+      df <- merged_data2()
+      var <- input$data_type2
+      
+      bins <- map_bins_fn(var)
+      pal <- colorBin(palette = map_palette, domain = df[[var]], bins = bins, na.color = "gray")
+      
+      leaflet(df) %>%
+        addProviderTiles(providers$CartoDB.Positron) %>%
+        addPolygons(
+          layerId = ~FIPS,
+          fillColor = ~pal(get(var)),
+          weight = 1,
+          color = "white",
+          fillOpacity = 0.7,
+          label = poly_label(df, var),
+          labelOptions = labelOptions(direction = "auto"),
+          highlight = highlightOptions(weight = 2, color = "#666", fillOpacity = 0.9)
+        ) %>%
+        addLegend("bottomright", pal = pal, values = df[[var]],
+                  title = ifelse(var == "Avg_Expenditures", 
+                                 "Avg Expenditures", 
+                                 "Total Count on Subsidies"), opacity = 1)
+    })
+    
+    # Trend map2
+    output$trend_map2 <- renderLeaflet({
+      req(input$trend_var2)
+      var <- input$trend_var2
+      
+      summary_df <- childcare_data %>%
+        group_by(FIPS) %>%
+        summarise(
+          Avg_Total_Count = mean(Avg_Total_Count, na.rm = TRUE),
+          Avg_Expenditures = mean(Avg_Expenditures, na.rm = TRUE),
+          .groups = "drop"
+        )
+      
+      df <- left_join(va_shape, summary_df, by = "FIPS")
+      bins <- map_bins_fn(var)
+      pal <- colorBin(palette = map_palette, domain = df[[var]], bins = bins, na.color = "gray")
+      
+      leaflet(df) %>%
+        addProviderTiles(providers$CartoDB.Positron) %>%
+        addPolygons(
+          layerId = ~FIPS,
+          fillColor = ~pal(get(var)),
+          weight = 1,
+          color = "white",
+          fillOpacity = 0.7,
+          label = poly_label(df, var),
+          labelOptions = labelOptions(direction = "auto"),
+          highlight = highlightOptions(weight = 2, color = "#666", fillOpacity = 0.9)
+        ) %>%
+        addLegend("bottomright", pal = pal, values = df[[var]],
+                  title = ifelse(var == "Avg_Expenditures", 
+                                 "Avg Expenditures", 
+                                 "Total Count on Subsidies"), opacity = 1)
+    })
+    
+    # Bar plot2
+    output$year_specific_plot2 <- renderPlotly({
+      locs <- selected_counties2()
+      req(input$data_type2)
+      if (length(locs) == 0) return(NULL)
+      
+      df <- childcare_data %>%
+        filter(year == input$year2, Locality %in% locs)
+      
+      if (input$data_type2 == "Avg_Total_Count") {
+        df <- df %>% mutate(hover_txt = paste0(Locality, "<br>Total Count: ", fmt_count(Avg_Total_Count)))
+        y_lab <- "Total Count on Subsidies"
+      } else {
+        df <- df %>% mutate(hover_txt = paste0(Locality, "<br>Expenditures: ", fmt_dollar(Avg_Expenditures)))
+        y_lab <- "Expenditures (USD)"
+      }
+      
+      g <- ggplot(df, aes(x = reorder(Locality, .data[[input$data_type2]]), 
+                          y = .data[[input$data_type2]], 
+                          fill = Locality,
+                          text = hover_txt)) +
+        geom_col() +
+        labs(
+          title = paste("Selected County", y_lab, "in", input$year2),
+          x = "County", y = y_lab
+        ) +
+        scale_fill_manual(values = rep(map_palette, length.out = length(unique(df$Locality)))) +
+        theme_minimal(base_family = "Times New Roman") +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")
+      
+      ggplotly(g, tooltip = "text")
+    })
+    
+    # Multi-county trend plot2
+    output$multi_county_plot2 <- renderPlotly({
+      locs <- selected_counties2()
+      req(input$trend_var2)
+      if (length(locs) == 0) return(NULL)
+      
+      plot_data <- childcare_data %>% filter(Locality %in% locs)
+      
+      plot_long <- plot_data %>%
+        select(Locality, year, Avg_Total_Count, Avg_Expenditures) %>%
+        pivot_longer(cols = c("Avg_Total_Count", "Avg_Expenditures"),
+                     names_to = "Metric", values_to = "Value") %>%
+        filter(Metric == input$trend_var2) %>%
+        mutate(
+          Metric_label = case_when(
+            Metric == "Avg_Total_Count" ~ "Total Count on Subsidies",
+            Metric == "Avg_Expenditures" ~ "Expenditures (USD)"
+          ),
+          hover_txt = case_when(
+            Metric == "Avg_Total_Count" ~ paste0(Locality, "<br>Year: ", year, "<br>Total Count: ", fmt_count(Value)),
+            Metric == "Avg_Expenditures" ~ paste0(Locality, "<br>Year: ", year, "<br>Expenditures: ", fmt_dollar(Value))
+          )
+        )
+      
+      g <- ggplot(plot_long, aes(x = year, y = Value, color = Locality, group = Locality, text = hover_txt)) +
+        geom_line(size = 1.2, na.rm = TRUE) +
+        geom_point(size = 2, na.rm = TRUE) +
+        labs(
+          title = paste("Trend of", unique(plot_long$Metric_label), "by County"),
+          x = "Year", y = unique(plot_long$Metric_label),
+          color = "County"
+        ) +
+        scale_color_manual(values = rep(map_palette, length.out = length(unique(plot_long$Locality)))) +
+        theme_minimal(base_family = "Times New Roman")
+      
+      ggplotly(g, tooltip = "text") %>% layout(legend = list(orientation = "h", x = 0, y = -0.2))
+    })
+  }
+  
+
   
 
     
-}
+
 # Run App -----------------------------------------------------------------
 shinyApp(ui = ui, server = server)
 
