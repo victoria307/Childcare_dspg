@@ -92,7 +92,7 @@ policy_data <- data.frame(
     NA,
     NA,
     NA
-    )),
+  )),
   
   summary = c(
     "In 2018, Virginia increased reimbursement rates for licensed providers to align more closely with the 70th percentile of the market rate survey.",
@@ -274,7 +274,7 @@ ui <- navbarPage(
                                 "The Child Care Crisis Is Keeping Women Out of the Workforce - Center for American Progress", target = "_blank")),
                  tags$li(tags$a(href = "https://bipartisanpolicy.org/blog/understanding-childcare-challenges-in-rural-america/https://www.ntca.org/sites/default/files/documents/2024-10/understanding-childcare-challenges-in-rural-america.pdf",
                                 "Understanding Childcare Challenges in Rural America", target = "_blank")),
-                
+                 
                ))
            )
   ),
@@ -296,190 +296,190 @@ ui <- navbarPage(
   ),
   
   navbarMenu("Maps",
-           tabPanel("Cost as a Percent of Income",
-                    fluidPage(
-             h2("Maps"),
-             h2("Virginia Childcare Costs as a Percent of Annual Family Income"),
-             sidebarLayout(
-               sidebarPanel(
-                 selectInput("STUDYYEAR", "Select Year", choices = 2009:2022),
-                 selectInput("percentile", "Select Pricing Point:", choices = c("50th Percentile"="M", "75th Percentile"="_75")),
-                 selectInput("age_group", "Select Age Group:", choices = c(
-                   "0 to 5 Months" = "Bto5",
-                   "6 to 11 Months" = "6to11",
-                   "12 to 17 Months" = "12to17",
-                   "18 to 23 Months" = "18to23",
-                   "24 to 29 Months" = "24to29",
-                   "30 to 35 Months" = "30to35",
-                   "36 to 41 Months" = "36to41",
-                   "42 to 47 Months" = "42to47",
-                   "48 to 53 Months" = "48to53",
-                   "54 Months to School Age" = "54toSA",
-                   "School Age" = "SA"
-                 )),
-                 selectInput("provider", "Select Provider Type:", choices = c("Center Care"="C", "Home Care"="FCC"))
-               ),
-               mainPanel(
-                 leafletOutput("childcareMap", height = "600px")
-               )
-             )
-           )
-  ),
-  tabPanel("Total Count on Subsidies & Trends",
-           fluidPage(
-             h2("Childcare Total Count on Subsidies & Expenditures"),
-             p("Use the selectors below to choose the year, data type, or trend metric. Click on counties in the map to select or deselect them. Selected counties will be highlighted and appear in the trend plots below the overall map. Switch between the 'Year-Specific View' and 'Time Trend View' tabs to explore data accordingly."),
-             sidebarLayout(
-               sidebarPanel(
-                 style = "background-color: #d3ebf5;",  # Same style as existing map panel
-                 
-                 # Show Year + Data Type only in year_view
-                 conditionalPanel(
-                   condition = "input.tabs2 == 'year_view2'",
-                   selectInput("year2", "Select Year:", 
-                               choices = sort(unique(childcare_data$year)), 
-                               selected = max(childcare_data$year)),
-                   selectInput("data_type2", "Select Data Type:",
-                               choices = c("Average Total Count" = "Avg_Total_Count",
-                                           "Average Expenditures (USD)" = "Avg_Expenditures"))
-                 ),
-                 
-                 # Show trend variable only in trend_view
-                 conditionalPanel(
-                   condition = "input.tabs2 == 'trend_view2'",
-                   selectInput("trend_var2", "Select a metric to show in time trend:",
-                               choices = c("Total Count" = "Avg_Total_Count",
-                                           "Expenditures (USD)" = "Avg_Expenditures"),
-                               selected = "Avg_Total_Count")
-                 ),
-                 
-                 # County picker and reset button (always visible)
-                 selectizeInput("county_picker2", "Select Counties:", 
-                                choices = sort(unique(childcare_data$Locality)), 
-                                multiple = TRUE),
-                 actionButton("reset_counties2", "Clear Selected Counties", 
-                              class = "btn btn-warning")
-               ),
-               
-               mainPanel(
-                 tabsetPanel(id = "tabs2",
-                             # --- Year-Specific View ---
-                             tabPanel(title = "Year-Specific View", value = "year_view2",
-                                      leafletOutput("map2", height = "600px"),
-                                      br(),
-                                      h4("Selected County Values for Selected Year", 
-                                         style = "font-family:'Times New Roman';"),
-                                      plotlyOutput("year_specific_plot2", height = "400px")
-                             ),
-                             
-                             # --- Time Trend View ---
-                             tabPanel(title = "Time Trend View", value = "trend_view2",
-                                      leafletOutput("trend_map2", height = "600px"),
-                                      h4("Trends Over Time for Selected Counties", 
-                                         style = "font-family:'Times New Roman';"),
-                                      plotlyOutput("multi_county_plot2", height = "400px")
-                             )
-                 )
-               )
-             )
-           )
-  )
-                 )
-              ,
-  
-
-# Joshua Stuff ------------------------------------------------------------
-
-navbarMenu("Analysis",
-           tabPanel("Variables Important to Female Employment",
-                    fluidPage(
-                      h2("Variables Important to Female Employment"),
-                      sidebarLayout(
-                        sidebarPanel(
-                          h4("Methodology"),
-                          p("Describe your regression model, data sources, and sample size."),
-                          tags$ul(
-                            tags$li("Survey data from CPS and SIPP"),
-                            tags$li("DiD model with robust standard errors"),
-                            tags$li("Controls: age, education, number of children")
+             tabPanel("Cost as a Percent of Income",
+                      fluidPage(
+                        h2("Maps"),
+                        h2("Virginia Childcare Costs as a Percent of Annual Family Income"),
+                        sidebarLayout(
+                          sidebarPanel(
+                            selectInput("STUDYYEAR", "Select Year", choices = 2009:2022),
+                            selectInput("percentile", "Select Pricing Point:", choices = c("50th Percentile"="M", "75th Percentile"="_75")),
+                            selectInput("age_group", "Select Age Group:", choices = c(
+                              "0 to 5 Months" = "Bto5",
+                              "6 to 11 Months" = "6to11",
+                              "12 to 17 Months" = "12to17",
+                              "18 to 23 Months" = "18to23",
+                              "24 to 29 Months" = "24to29",
+                              "30 to 35 Months" = "30to35",
+                              "36 to 41 Months" = "36to41",
+                              "42 to 47 Months" = "42to47",
+                              "48 to 53 Months" = "48to53",
+                              "54 Months to School Age" = "54toSA",
+                              "School Age" = "SA"
+                            )),
+                            selectInput("provider", "Select Provider Type:", choices = c("Center Care"="C", "Home Care"="FCC"))
+                          ),
+                          mainPanel(
+                            leafletOutput("childcareMap", height = "600px")
                           )
-                        ),
-                        mainPanel(
-                          h4("Regression Output"),
-                          br(),
                         )
                       )
-                    )
-           ),
-           tabPanel("Predicting Employment Outcomes",
-                    fluidPage(
-                      h2("Predicting Employment Outcomes"),
-                      sidebarLayout(
-                        sidebarPanel(
-                          div(
-                            style = "position: sticky; top: 80px;",
-                            h4(tags$strong("Methodology")),
-                            p("Using Ordinary Least Squares, we analyzed the Survey of Income and Program Participation"),
-                            tags$ul(
-                              tags$li("National Survey data from 2020 - 2023"),
-                              tags$li("Filtered for households with at least one child under the age of 5"),
-                              tags$li("Welfare or SS variable was used as a proxy for subsidy")
-                            ),
-                            p("We find positive impacts of using childcare, espeically in rural areas, however we find a negative impact of 
-                              Welfare or Social Security. This may be because of the imprecise nature of our variable, biasing our coeficcients toward 0, as well as
-                              a nonrepresentative sample. This motivates us to further explore the impact of subsidy through a Differences-in-Differences Model"),
+             ),
+             tabPanel("Total Count on Subsidies & Trends",
+                      fluidPage(
+                        h2("Childcare Total Count on Subsidies & Expenditures"),
+                        p("Use the selectors below to choose the year, data type, or trend metric. Click on counties in the map to select or deselect them. Selected counties will be highlighted and appear in the trend plots below the overall map. Switch between the 'Year-Specific View' and 'Time Trend View' tabs to explore data accordingly."),
+                        sidebarLayout(
+                          sidebarPanel(
+                            style = "background-color: #d3ebf5;",  # Same style as existing map panel
                             
-                            tags$figure(
-                              img(
-                                src = "images/chart1.png",
-                                width = "100%",
-                                style = "border:1px solid #ccc; border-radius:8px;",
-                                alt = "Key Predictors of Employment Chart"
-                              ),
-                              tags$figcaption(
-                                style = "font-size: 0.9em; color: #555; text-align: center; margin-top: 5px;",
-                                "Figure: Coefficient Chart" 
-                              )
+                            # Show Year + Data Type only in year_view
+                            conditionalPanel(
+                              condition = "input.tabs2 == 'year_view2'",
+                              selectInput("year2", "Select Year:", 
+                                          choices = sort(unique(childcare_data$year)), 
+                                          selected = max(childcare_data$year)),
+                              selectInput("data_type2", "Select Data Type:",
+                                          choices = c("Average Total Count" = "Avg_Total_Count",
+                                                      "Average Expenditures (USD)" = "Avg_Expenditures"))
+                            ),
+                            
+                            # Show trend variable only in trend_view
+                            conditionalPanel(
+                              condition = "input.tabs2 == 'trend_view2'",
+                              selectInput("trend_var2", "Select a metric to show in time trend:",
+                                          choices = c("Total Count" = "Avg_Total_Count",
+                                                      "Expenditures (USD)" = "Avg_Expenditures"),
+                                          selected = "Avg_Total_Count")
+                            ),
+                            
+                            # County picker and reset button (always visible)
+                            selectizeInput("county_picker2", "Select Counties:", 
+                                           choices = sort(unique(childcare_data$Locality)), 
+                                           multiple = TRUE),
+                            actionButton("reset_counties2", "Clear Selected Counties", 
+                                         class = "btn btn-warning")
+                          ),
+                          
+                          mainPanel(
+                            tabsetPanel(id = "tabs2",
+                                        # --- Year-Specific View ---
+                                        tabPanel(title = "Year-Specific View", value = "year_view2",
+                                                 leafletOutput("map2", height = "600px"),
+                                                 br(),
+                                                 h4("Selected County Values for Selected Year", 
+                                                    style = "font-family:'Times New Roman';"),
+                                                 plotlyOutput("year_specific_plot2", height = "400px")
+                                        ),
+                                        
+                                        # --- Time Trend View ---
+                                        tabPanel(title = "Time Trend View", value = "trend_view2",
+                                                 leafletOutput("trend_map2", height = "600px"),
+                                                 h4("Trends Over Time for Selected Counties", 
+                                                    style = "font-family:'Times New Roman';"),
+                                                 plotlyOutput("multi_county_plot2", height = "400px")
+                                        )
                             )
                           )
-                        ),
-                        mainPanel(
-                          h4(tags$strong("Model Equation (OLS with Controls)")),
-                          withMathJax(
-                            helpText("$$
+                        )
+                      )
+             )
+  )
+  ,
+  
+  
+  # Joshua Stuff ------------------------------------------------------------
+  
+  navbarMenu("Analysis",
+             tabPanel("Variables Important to Female Employment",
+                      fluidPage(
+                        h2("Variables Important to Female Employment"),
+                        sidebarLayout(
+                          sidebarPanel(
+                            h4("Methodology"),
+                            p("Describe your regression model, data sources, and sample size."),
+                            tags$ul(
+                              tags$li("Survey data from CPS and SIPP"),
+                              tags$li("DiD model with robust standard errors"),
+                              tags$li("Controls: age, education, number of children")
+                            )
+                          ),
+                          mainPanel(
+                            h4("Regression Output"),
+                            br(),
+                          )
+                        )
+                      )
+             ),
+             tabPanel("Predicting Employment Outcomes",
+                      fluidPage(
+                        h2("Predicting Employment Outcomes"),
+                        sidebarLayout(
+                          sidebarPanel(
+                            div(
+                              style = "position: sticky; top: 80px;",
+                              h4(tags$strong("Methodology")),
+                              p("Using Ordinary Least Squares, we analyzed the Survey of Income and Program Participation"),
+                              tags$ul(
+                                tags$li("National Survey data from 2020 - 2023"),
+                                tags$li("Filtered for households with at least one child under the age of 5"),
+                                tags$li("Welfare or SS variable was used as a proxy for subsidy")
+                              ),
+                              p("We find positive impacts of using childcare, espeically in rural areas, however we find a negative impact of 
+                              Welfare or Social Security. This may be because of the imprecise nature of our variable, biasing our coeficcients toward 0, as well as
+                              a nonrepresentative sample. This motivates us to further explore the impact of subsidy through a Differences-in-Differences Model"),
+                              
+                              tags$figure(
+                                img(
+                                  src = "images/chart1.png",
+                                  width = "100%",
+                                  style = "border:1px solid #ccc; border-radius:8px;",
+                                  alt = "Key Predictors of Employment Chart"
+                                ),
+                                tags$figcaption(
+                                  style = "font-size: 0.9em; color: #555; text-align: center; margin-top: 5px;",
+                                  "Figure: Coefficient Chart" 
+                                )
+                              )
+                            )
+                          ),
+                          mainPanel(
+                            h4(tags$strong("Model Equation (OLS with Controls)")),
+                            withMathJax(
+                              helpText("$$
 \\begin{aligned}
 \\text{Employment}_{i,t} &= \\beta_0 + \\beta_1 \\text{Female}_{i,t} + \\beta_2 \\text{Childcare}_i + \\beta_3 \\text{NonMetro}_{i,t} \\\\
 &\\quad + \\beta_4 \\text{WelfareorSS}_{i,t} + \\beta_5 \\text{(NonMetro * Childcare)}_{i,t} \\\\
 &\\quad + \\text{Controls}_{i,t} \\boldsymbol{\\gamma} + \\epsilon_{i,t}
 \\end{aligned}
 $$")
-                          ),
-                          br(),
-                          h4(tags$strong("Key Variables (OLS with Controls)")),
-                          htmlOutput("SIPPKey"),
-                          tags$div(
-                            style = "margin-top: -15px; ; font-size: 0.9em; font-style: italic; font-family: 'Times New Roman', Times, serif;",
-                            HTML("Note: <b>+</b> p &lt; 0.1;&nbsp; <b>*</b> p &lt; 0.05;&nbsp; <b>**</b> p &lt; 0.01;&nbsp; <b>***</b> p &lt; 0.001")
-                          ),
-                          br(),
-                          h4(tags$strong("Controls (OLS with Controls)")),
-                          htmlOutput("SIPPControls"),
-                          tags$div(
-                            style = "margin-top: -15px; ; font-size: 0.9em; font-style: italic; font-family: 'Times New Roman', Times, serif;",
-                            HTML("Note: <b>+</b> p &lt; 0.1;&nbsp; <b>*</b> p &lt; 0.05;&nbsp; <b>**</b> p &lt; 0.01;&nbsp; <b>***</b> p &lt; 0.001")
+                            ),
+                            br(),
+                            h4(tags$strong("Key Variables (OLS with Controls)")),
+                            htmlOutput("SIPPKey"),
+                            tags$div(
+                              style = "margin-top: -15px; ; font-size: 0.9em; font-style: italic; font-family: 'Times New Roman', Times, serif;",
+                              HTML("Note: <b>+</b> p &lt; 0.1;&nbsp; <b>*</b> p &lt; 0.05;&nbsp; <b>**</b> p &lt; 0.01;&nbsp; <b>***</b> p &lt; 0.001")
+                            ),
+                            br(),
+                            h4(tags$strong("Controls (OLS with Controls)")),
+                            htmlOutput("SIPPControls"),
+                            tags$div(
+                              style = "margin-top: -15px; ; font-size: 0.9em; font-style: italic; font-family: 'Times New Roman', Times, serif;",
+                              HTML("Note: <b>+</b> p &lt; 0.1;&nbsp; <b>*</b> p &lt; 0.05;&nbsp; <b>**</b> p &lt; 0.01;&nbsp; <b>***</b> p &lt; 0.001")
+                            )
+                            
                           )
-                          
                         )
                       )
-                    )
-           ),
-           tabPanel("Machine Learning Model",
-                    fluidPage(
-                      h2("Machine Learning Model"),
-                      sidebarLayout(
-                        sidebarPanel(
-                          h4(tags$strong("Methodology")),
-                          p("Income and employment status are endogenous, as 
+             ),
+             tabPanel("Machine Learning Model",
+                      fluidPage(
+                        h2("Machine Learning Model"),
+                        sidebarLayout(
+                          sidebarPanel(
+                            h4(tags$strong("Methodology")),
+                            p("Income and employment status are endogenous, as 
                             individuals may make choices, such as working additional 
                             hours or declining a promotion, 
                             that affect their subsidy eligibility. 
@@ -490,57 +490,57 @@ $$")
                             highest accuracy and kappa score. 
                             Kappa measures the agreement between predicted and actual classifications,
                             adjusted for chance. A kappa score above 0.60 is generally considered good, with values above 0.80 indicating strong agreement."),
-                          tags$ul(
-                            tags$li("Classifcation and Regression Tree (CART): A decision tree algorithm that splits data into branches to predict outcome."),
-                            tags$li("Linear Discriminant Analysis (LDA): A linear classifier that separates classes by maximizing variance between them"),
-                            tags$li("Support Vector Machine (SVM): Identifies the optimal boundary (hyperplane) that best separates classes"),
-                            tags$li("k-Nearest Neighbors (kNN): Classifies based on the majority vote among the k closest data points"),
-                            tags$li("Random Forest (RF): An ensemble of decision trees that boosts accuracy by averaging many trees.")
-                          )
-                        ),
-                        mainPanel(
-                          tags$figure(
-                            img(
-                              src = "images/MachineLearningModel.png",
-                              width = "100%",
-                              style = "border:1px solid #ccc; border-radius:8px;",
-                              alt = "Key Predictors of Employment Chart"
-                            ),
-                            tags$figcaption(
-                              style = "font-size: 0.9em; color: #555; text-align: center; margin-top: 5px;",
-                              "Figure: Machine Learning Model Results" 
+                            tags$ul(
+                              tags$li("Classifcation and Regression Tree (CART): A decision tree algorithm that splits data into branches to predict outcome."),
+                              tags$li("Linear Discriminant Analysis (LDA): A linear classifier that separates classes by maximizing variance between them"),
+                              tags$li("Support Vector Machine (SVM): Identifies the optimal boundary (hyperplane) that best separates classes"),
+                              tags$li("k-Nearest Neighbors (kNN): Classifies based on the majority vote among the k closest data points"),
+                              tags$li("Random Forest (RF): An ensemble of decision trees that boosts accuracy by averaging many trees.")
                             )
                           ),
-                          br(),
-                          
+                          mainPanel(
+                            tags$figure(
+                              img(
+                                src = "images/MachineLearningModel.png",
+                                width = "100%",
+                                style = "border:1px solid #ccc; border-radius:8px;",
+                                alt = "Key Predictors of Employment Chart"
+                              ),
+                              tags$figcaption(
+                                style = "font-size: 0.9em; color: #555; text-align: center; margin-top: 5px;",
+                                "Figure: Machine Learning Model Results" 
+                              )
+                            ),
+                            br(),
+                            
+                          )
                         )
                       )
-                    )
-           ),
-           tabPanel("Fixed Effects Differences-in-Differences Model",
-                    fluidPage(
-                      h2("Fixed Effects Differences-in-Differences Model"),
-                      sidebarLayout(
-                        sidebarPanel(
-                          h4(tags$strong("Methodology")),
-                          p("To isolate the impact of subsidy usage on employment, 
+             ),
+             tabPanel("Fixed Effects Differences-in-Differences Model",
+                      fluidPage(
+                        h2("Fixed Effects Differences-in-Differences Model"),
+                        sidebarLayout(
+                          sidebarPanel(
+                            h4(tags$strong("Methodology")),
+                            p("To isolate the impact of subsidy usage on employment, 
                             we implemented a Difference-in-Differences model leveraging Virginia’s 
                             July 2022 expansion of Child Care Development Fund eligibility, from 65% to 85% of the State Median Income.
                             Using data from the Current Population Survey spanning 2019 to 2025, we focused on Virginia households with 
                             children under the age of five. We also incorporated household, month, and year fixed effects to control for
                             time-invariant and temporal factors."),
-                        ),
-                        mainPanel(
-                          h4(tags$strong("Model Equation")),
-                          withMathJax(
-                            helpText("$$
+                          ),
+                          mainPanel(
+                            h4(tags$strong("Model Equation")),
+                            withMathJax(
+                              helpText("$$
 \\begin{aligned}
 \\text{Employment}_{i,t} &= \\beta_0 + \\beta_1 \\, \\text{Predicted_Subsidy}_{i,t} + \\beta_2 \\, \\text{Post}_{i,t} \\\\
 &\\quad + \\beta_3 \\, (\\text{Predicted_Subsidy} \\times \\text{Post})_{i,t} + \\text{Controls}_{i,t} \\boldsymbol{\\gamma} \\\\
 &\\quad + \\alpha_{\\text{household(FE)}(i)} + \\delta_{\\text{month(FE)}(t)} + \\theta_{\\text{year(FE)}(t)} + \\epsilon_{i,t}
 \\end{aligned}
 $$")
-                          ),
+                            ),
                             br(),
                             h4(tags$strong("Key Variables")),
                             htmlOutput("CPSKey"),
@@ -559,8 +559,8 @@ $$")
                           )
                         )
                       )
-                    )),
-
+             )),
+  
   #ABOUT US-------
   tabPanel("About Us",
            fluidPage(
@@ -675,7 +675,7 @@ $$")
              )
            )
   ),
-
+  
   tabPanel("Acknowledgements",
            fluidPage(
              div(
@@ -687,87 +687,87 @@ $$")
                # --- Flex container for all data blocks ---
                div(
                  style = "display: flex; flex-direction: column; gap: 30px; text-align:left;",
-            
-               
-               # --- Flex container for all data blocks ---
-               div(
-                 style = "display: flex; flex-direction: column; gap: 30px;",
                  
-                 # --- CPS ---
-                 div(
-                   style = "display: flex; align-items: flex-start; gap: 20px;",
-                   img(src = "images/CPS.avif", height = "120px", style = "flex-shrink:0;"),
-                   div(
-                     tags$a(
-                       "Current Population Survey",
-                       href = "https://www.census.gov/programs-surveys/cps.html",
-                       target = "_blank",
-                       style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"
-                     ),
-                     p('"The Current Population Survey (CPS) is sponsored by both the U.S. Census Bureau and the U.S. Bureau of Labor Statistics (BLS), and is the primary source of labor force statistics for the population of the USA."- Taken from the CPS website.',
-                       style = "font-size:14px; color:#333333; margin-top:5px;")
-                   )
-                 ),
                  
-                 # --- NDCP ---
+                 # --- Flex container for all data blocks ---
                  div(
-                   style = "display: flex; align-items: flex-start; gap: 20px;",
-                   img(src = "images/ndcp.png", height = "120px", style = "flex-shrink:0;"),
+                   style = "display: flex; flex-direction: column; gap: 30px;",
+                   
+                   # --- CPS ---
                    div(
-                     tags$a(
-                       "National Database of Childcare Prices",
-                       href = "https://www.dol.gov/agencies/wb/topics/featured-childcare",
-                       target = "_blank",
-                       style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"
-                     ),
-                     p('"The National Database of Childcare Prices (NDCP) is the most comprehensive federal source of childcare prices at the county level. The database offers childcare price data by childcare provider type, age of children, and county characteristics. Data are available from 2008 through 2022."-Taken from NCDP',
-                       style = "font-size:14px; color:#333333; margin-top:5px;")
-                   )
-                 ),
-                 
-                 # --- SIPP ---
-                 div(
-                   style = "display: flex; align-items: flex-start; gap: 20px;",
-                   img(src = "images/SIPP.png", height = "120px", style = "flex-shrink:0;"),
-                   div(
-                     tags$a(
-                       "Survey of Income and Program Participation",
-                       href = "https://www.census.gov/programs-surveys/sipp.html",
-                       target = "_blank",
-                       style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"
-                     ),
-                     p('"SIPP is a nationally representative longitudinal survey that provides comprehensive information on the dynamics of income, employment, household composition, and government program participation. SIPP is also a leading source of data on economic well-being, family dynamics, education, wealth, health insurance, child care, and food security. The survey interviews individuals for several years and provides monthly data about changes in household and family composition and economic circumstances over time."-Taken from the SIPP website',
-                       style = "font-size:14px; color:#333333; margin-top:5px;")
-                   )
-                 ),
-                 
-                 # --- VDOE ---
-                 div(
-                   style = "display: flex; align-items: flex-start; gap: 20px;",
-                   img(src = "images/VDOE.jpg", height = "120px", style = "flex-shrink:0;"),
-                   div(
-                     tags$a("Virginia Department of Education",
-                            style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"),
-                     p("Special thanks to the Virginia Department of Education (VDOE) for consulting with our team and providing data on expenditures and total count of children on subsidies by county in the state of Virginia.",
-                       style = "font-size:14px; color:#333333; margin-top:5px;")
-                   )
-                 )
-               ),
-               
-               # --- Final text at the bottom ---
-               div(
-                 style = "margin-top:30px; text-align:center;",
-                 p(
-                   tags$b(
-                     "This work is supported by the U.S. Department of Agriculture, National Institute of Food and Agriculture as part of the DATA-ACRE program [grant no. 2022-67037-36639 / project accession no. 2021-10424]."
+                     style = "display: flex; align-items: flex-start; gap: 20px;",
+                     img(src = "images/CPS.avif", height = "120px", style = "flex-shrink:0;"),
+                     div(
+                       tags$a(
+                         "Current Population Survey",
+                         href = "https://www.census.gov/programs-surveys/cps.html",
+                         target = "_blank",
+                         style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"
+                       ),
+                       p('"The Current Population Survey (CPS) is sponsored by both the U.S. Census Bureau and the U.S. Bureau of Labor Statistics (BLS), and is the primary source of labor force statistics for the population of the USA."- Taken from the CPS website.',
+                         style = "font-size:14px; color:#333333; margin-top:5px;")
+                     )
                    ),
-                   style = "font-size:14px; color:#333333;"
+                   
+                   # --- NDCP ---
+                   div(
+                     style = "display: flex; align-items: flex-start; gap: 20px;",
+                     img(src = "images/ndcp.png", height = "120px", style = "flex-shrink:0;"),
+                     div(
+                       tags$a(
+                         "National Database of Childcare Prices",
+                         href = "https://www.dol.gov/agencies/wb/topics/featured-childcare",
+                         target = "_blank",
+                         style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"
+                       ),
+                       p('"The National Database of Childcare Prices (NDCP) is the most comprehensive federal source of childcare prices at the county level. The database offers childcare price data by childcare provider type, age of children, and county characteristics. Data are available from 2008 through 2022."-Taken from NCDP',
+                         style = "font-size:14px; color:#333333; margin-top:5px;")
+                     )
+                   ),
+                   
+                   # --- SIPP ---
+                   div(
+                     style = "display: flex; align-items: flex-start; gap: 20px;",
+                     img(src = "images/SIPP.png", height = "120px", style = "flex-shrink:0;"),
+                     div(
+                       tags$a(
+                         "Survey of Income and Program Participation",
+                         href = "https://www.census.gov/programs-surveys/sipp.html",
+                         target = "_blank",
+                         style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"
+                       ),
+                       p('"SIPP is a nationally representative longitudinal survey that provides comprehensive information on the dynamics of income, employment, household composition, and government program participation. SIPP is also a leading source of data on economic well-being, family dynamics, education, wealth, health insurance, child care, and food security. The survey interviews individuals for several years and provides monthly data about changes in household and family composition and economic circumstances over time."-Taken from the SIPP website',
+                         style = "font-size:14px; color:#333333; margin-top:5px;")
+                     )
+                   ),
+                   
+                   # --- VDOE ---
+                   div(
+                     style = "display: flex; align-items: flex-start; gap: 20px;",
+                     img(src = "images/VDOE.jpg", height = "120px", style = "flex-shrink:0;"),
+                     div(
+                       tags$a("Virginia Department of Education",
+                              style = "font-size:16px; font-weight:bold; text-decoration:underline; color:#0072B2;"),
+                       p("Special thanks to the Virginia Department of Education (VDOE) for consulting with our team and providing data on expenditures and total count of children on subsidies by county in the state of Virginia.",
+                         style = "font-size:14px; color:#333333; margin-top:5px;")
+                     )
+                   )
+                 ),
+                 
+                 # --- Final text at the bottom ---
+                 div(
+                   style = "margin-top:30px; text-align:center;",
+                   p(
+                     tags$b(
+                       "This work is supported by the U.S. Department of Agriculture, National Institute of Food and Agriculture as part of the DATA-ACRE program [grant no. 2022-67037-36639 / project accession no. 2021-10424]."
+                     ),
+                     style = "font-size:14px; color:#333333;"
+                   )
                  )
                )
              )
            )
-  )
-))
+  ))
 
 
 # Server ------------------------------------------------------------------
@@ -933,43 +933,43 @@ server <- function(input, output, session) {
     
     p
   })
-        
-    
-   
-
-# Joshua Tables -----------------------------------------------------------
   
-    output$SIPPKey <- renderUI({
-      SIPPKey <- data.frame(
-        Variables = c("Intercept","Female", "ChildCare", "NonMetro" , "WelfareorSS", "NonMetro x ChildCare"),
-        Coefficients = c(0.898,-0.117,0.096, -0.021, -.030, 0.121),
-        `P-Value` = c("2e-16***","1.43e-11***","5.80e-08***", "2e-16***","0.151","0.011*"),
-        Interpretation = c(
-          "The baseline employment likliehood in the dataset was 89.81%",
-          "Women have a 11.7% lower likliehood of employment compared to men",
-          "Usage of Childcare increased employment likliehood by 9.6%",
-          "Non-Metro status was associated with a 2.1% decrease in employment",
-          "Usage of Welfare or Social Security lead to a 3% decrease in employment outcomes (Not significnat)",
-          "Childcare usage in Non-Metro areas was associated with a significant 12.1% increase in employment"
-        )
+  
+  
+  
+  # Joshua Tables -----------------------------------------------------------
+  
+  output$SIPPKey <- renderUI({
+    SIPPKey <- data.frame(
+      Variables = c("Intercept","Female", "ChildCare", "NonMetro" , "WelfareorSS", "NonMetro x ChildCare"),
+      Coefficients = c(0.898,-0.117,0.096, -0.021, -.030, 0.121),
+      `P-Value` = c("2e-16***","1.43e-11***","5.80e-08***", "2e-16***","0.151","0.011*"),
+      Interpretation = c(
+        "The baseline employment likliehood in the dataset was 89.81%",
+        "Women have a 11.7% lower likliehood of employment compared to men",
+        "Usage of Childcare increased employment likliehood by 9.6%",
+        "Non-Metro status was associated with a 2.1% decrease in employment",
+        "Usage of Welfare or Social Security lead to a 3% decrease in employment outcomes (Not significnat)",
+        "Childcare usage in Non-Metro areas was associated with a significant 12.1% increase in employment"
       )
-      
-      html_table <- SIPPKey %>%
-        kable(
-          format = "html",
-          align = "lcc",
-          col.names = c("Variables", "Coefficients", "P-Value", "Interpretation"),
-          table.attr = 'style="border: 2px solid black; border-collapse: separate; border-spacing: 0;"'
-        ) %>%
-        kable_styling(
-          bootstrap_options = c("striped", "hover", "condensed", "responsive"),
-          full_width = FALSE,
-          position = "center"
-        ) %>%
-        column_spec(3, width = "120px")  
-      HTML(html_table)
-      
-    })
+    )
+    
+    html_table <- SIPPKey %>%
+      kable(
+        format = "html",
+        align = "lcc",
+        col.names = c("Variables", "Coefficients", "P-Value", "Interpretation"),
+        table.attr = 'style="border: 2px solid black; border-collapse: separate; border-spacing: 0;"'
+      ) %>%
+      kable_styling(
+        bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+        full_width = FALSE,
+        position = "center"
+      ) %>%
+      column_spec(3, width = "120px")  
+    HTML(html_table)
+    
+  })
   
   output$SIPPControls <- renderUI({
     SIPPControls <- data.frame(
@@ -1033,23 +1033,23 @@ server <- function(input, output, session) {
   
   output$CPSKey <- renderUI({
     CPSKey <- data.frame(
-        Variables = c(
-          "predicted_subsidy: Newly_Eligible", 
-          "Post", 
-          "Newly Eligible × Post"
-        ),
-        Coefficients = c(
-         0.054, 0.007, 0.099
-        ),
-        P_Value = c(
-          "0.170", "0.875", "0.0468*"
-        ),
-        Interpretation = c(
-          "Newly-Eligible households were 5.4% more likely to be employed (pre-period)",
-          "Post-period dummy had no significant effect by itself",
-          "Newly-Eligible households saw a 9.9% employment increase post-policy"
-        )
-        )
+      Variables = c(
+        "predicted_subsidy: Newly_Eligible", 
+        "Post", 
+        "Newly Eligible × Post"
+      ),
+      Coefficients = c(
+        0.054, 0.007, 0.099
+      ),
+      P_Value = c(
+        "0.170", "0.875", "0.0468*"
+      ),
+      Interpretation = c(
+        "Newly-Eligible households were 5.4% more likely to be employed (pre-period)",
+        "Post-period dummy had no significant effect by itself",
+        "Newly-Eligible households saw a 9.9% employment increase post-policy"
+      )
+    )
     
     html_table <- CPSKey %>%
       kable(
@@ -1070,52 +1070,52 @@ server <- function(input, output, session) {
   
   output$CPSControls <- renderUI({
     CPSControls <- data.frame(
-        Variables = c(
-          "predicted_subsidy: Never_Eligible", 
-          "AGE", 
-          "NCHLT5", 
-          "Married", 
-          "Female", 
-          "Race: American Indian", 
-          "Race: Asian or Pacific Islander", 
-          "Race: Black", 
-          "Race: White", 
-          "Rural", 
-          "Education: Graduate/Prof Degree", 
-          "Education: HS", 
-          "Education: No HS", 
-          "Education: Some College", 
-          "Never Eligible × Post"
-        ),
-        Coefficients = c(
-          0.118, 0.005, -0.063,
-          0.003, -0.188, -0.010, -0.122, -0.094,
-          -0.063, -0.045, 0.035, -0.193, -0.224,
-          -0.193, 0.029
-        ),
-        P_Value = c(
-          "0.026*", "0.101", "0.0002***",
-          "0.944", "<2e-16***", "0.980", "0.173", "0.318",
-          "0.356", "2.53e-08***", "0.237", "5.57e-05***", "0.0057**",
-          "1.04e-06***", "0.509" 
-        ),
-        Interpretation = c(
-          "Never-Eligible households were 11.8% more likely to be employed (pre-period)",
-          "Each year of age slightly increased employment probability",
-          "Each child under 5 decreased employment by 6.3%",
-          "Marriage had no significant impact on employment",
-          "Females were 18.8% less likely to be employed than males",
-          "No significant effect for American Indian category",
-          "Asian/Pacific Islanders showed a non-significant decrease in employment",
-          "Black individuals had lower employment, but not significantly",
-          "White individuals also had lower employment (not significant)",
-          "Living in a rural area decreased employment by 4.5%",
-          "Graduate/Professional degrees showed a modest, non-significant boost",
-          "High school education reduced employment likelihood significantly",
-          "No HS reduced employment likelihood by 22.4%",
-          "Some college reduced employment likelihood by 19.3%",
-          "No significant interaction effect for Never-Eligible post-period"
-        )
+      Variables = c(
+        "predicted_subsidy: Never_Eligible", 
+        "AGE", 
+        "NCHLT5", 
+        "Married", 
+        "Female", 
+        "Race: American Indian", 
+        "Race: Asian or Pacific Islander", 
+        "Race: Black", 
+        "Race: White", 
+        "Rural", 
+        "Education: Graduate/Prof Degree", 
+        "Education: HS", 
+        "Education: No HS", 
+        "Education: Some College", 
+        "Never Eligible × Post"
+      ),
+      Coefficients = c(
+        0.118, 0.005, -0.063,
+        0.003, -0.188, -0.010, -0.122, -0.094,
+        -0.063, -0.045, 0.035, -0.193, -0.224,
+        -0.193, 0.029
+      ),
+      P_Value = c(
+        "0.026*", "0.101", "0.0002***",
+        "0.944", "<2e-16***", "0.980", "0.173", "0.318",
+        "0.356", "2.53e-08***", "0.237", "5.57e-05***", "0.0057**",
+        "1.04e-06***", "0.509" 
+      ),
+      Interpretation = c(
+        "Never-Eligible households were 11.8% more likely to be employed (pre-period)",
+        "Each year of age slightly increased employment probability",
+        "Each child under 5 decreased employment by 6.3%",
+        "Marriage had no significant impact on employment",
+        "Females were 18.8% less likely to be employed than males",
+        "No significant effect for American Indian category",
+        "Asian/Pacific Islanders showed a non-significant decrease in employment",
+        "Black individuals had lower employment, but not significantly",
+        "White individuals also had lower employment (not significant)",
+        "Living in a rural area decreased employment by 4.5%",
+        "Graduate/Professional degrees showed a modest, non-significant boost",
+        "High school education reduced employment likelihood significantly",
+        "No HS reduced employment likelihood by 22.4%",
+        "Some college reduced employment likelihood by 19.3%",
+        "No significant interaction effect for Never-Eligible post-period"
+      )
     )
     
     html_table <- CPSControls %>%
@@ -1136,438 +1136,439 @@ server <- function(input, output, session) {
   })
   #RURAL URBAN MAP------------
   # Counties selected for new maps
+  
+  # ==============================
+  # 1. Counties selected for original maps (first tab)
+  # ==============================
+  selected_counties <- reactiveVal(character(0))
+  
+  observeEvent(input$map_shape_click, {
+    clicked_fips <- input$map_shape_click$id
+    clicked_name <- childcare_data %>%
+      filter(FIPS == clicked_fips) %>%
+      pull(Locality) %>% unique() %>% first()
     
-    # ==============================
-    # 1. Counties selected for original maps (first tab)
-    # ==============================
-    selected_counties <- reactiveVal(character(0))
-    
-    observeEvent(input$map_shape_click, {
-      clicked_fips <- input$map_shape_click$id
-      clicked_name <- childcare_data %>%
-        filter(FIPS == clicked_fips) %>%
-        pull(Locality) %>% unique() %>% first()
-      
-      if (!is.null(clicked_name)) {
-        updated <- if (clicked_name %in% selected_counties()) {
-          setdiff(selected_counties(), clicked_name)
-        } else {
-          union(selected_counties(), clicked_name)
-        }
-        selected_counties(updated)
-        updateSelectizeInput(session, "county_picker", selected = updated)
+    if (!is.null(clicked_name)) {
+      updated <- if (clicked_name %in% selected_counties()) {
+        setdiff(selected_counties(), clicked_name)
+      } else {
+        union(selected_counties(), clicked_name)
       }
-    })
-    
-    observeEvent(input$trend_map_shape_click, {
-      clicked_fips <- input$trend_map_shape_click$id
-      clicked_name <- childcare_data %>%
-        filter(FIPS == clicked_fips) %>% pull(Locality) %>% unique() %>% first()
-      
-      if (!is.null(clicked_name)) {
-        updated <- if (clicked_name %in% selected_counties()) {
-          setdiff(selected_counties(), clicked_name)
-        } else {
-          union(selected_counties(), clicked_name)
-        }
-        selected_counties(updated)
-        updateSelectizeInput(session, "county_picker", selected = updated)
-      }
-    })
-    
-    observeEvent(input$county_picker, { selected_counties(input$county_picker) })
-    
-    observe({
-      req(input$year2, input$data_type2)
-      
-      valid_choices <- valid_county_choices2()
-      new_selected <- intersect(selected_counties2(), valid_choices)
-      selected_counties2(new_selected)
-      
-      updateSelectizeInput(
-        session,
-        "county_picker2",
-        choices = valid_choices,
-        selected = new_selected
-      )
-    })
-    
-    
-    observeEvent(input$reset_counties, {
-      selected_counties(character(0))
-      updateSelectizeInput(session, "county_picker", selected = character(0))
-    })
-    
-    # ==============================
-    # 2. Counties selected for new maps (second tab)
-    # ==============================
-    selected_counties2 <- reactiveVal(character(0))
-    
-    observeEvent(input$map2_shape_click, {
-      clicked_fips <- input$map2_shape_click$id
-      clicked_name <- childcare_data %>%
-        filter(FIPS == clicked_fips) %>% pull(Locality) %>% unique() %>% first()
-      
-      if (!is.null(clicked_name)) {
-        updated <- if (clicked_name %in% selected_counties2()) {
-          setdiff(selected_counties2(), clicked_name)
-        } else {
-          union(selected_counties2(), clicked_name)
-        }
-        selected_counties2(updated)
-        updateSelectizeInput(session, "county_picker2", selected = updated)
-      }
-    })
-    
-    observeEvent(input$trend_map2_shape_click, {
-      clicked_fips <- input$trend_map2_shape_click$id
-      clicked_name <- childcare_data %>%
-        filter(FIPS == clicked_fips) %>% pull(Locality) %>% unique() %>% first()
-      
-      if (!is.null(clicked_name)) {
-        updated <- if (clicked_name %in% selected_counties2()) {
-          setdiff(selected_counties2(), clicked_name)
-        } else {
-          union(selected_counties2(), clicked_name)
-        }
-        selected_counties2(updated)
-        updateSelectizeInput(session, "county_picker2", selected = updated)
-      }
-    })
-    
-    observeEvent(input$county_picker2, { selected_counties2(input$county_picker2) })
-    
-    observeEvent(input$reset_counties2, {
-      selected_counties2(character(0))
-      updateSelectizeInput(session, "county_picker2", selected = character(0))
-    })
-    
-    # ==============================
-    # 3. Shared helper functions
-    # ==============================
-    poly_label <- function(df, varname) {
-      val_fmt <- if (varname == "Avg_Expenditures") fmt_dollar else fmt_count
-      paste0("<strong>", df$NAME, "</strong><br/>",
-             ifelse(varname == "Avg_Expenditures", 
-                    "Avg Expenditures: ", "Total Count on Subsidies: "),
-             ifelse(is.na(df[[varname]]), "NA", val_fmt(df[[varname]]))) %>%
-        lapply(htmltools::HTML)
+      selected_counties(updated)
+      updateSelectizeInput(session, "county_picker", selected = updated)
     }
+  })
+  
+  observeEvent(input$trend_map_shape_click, {
+    clicked_fips <- input$trend_map_shape_click$id
+    clicked_name <- childcare_data %>%
+      filter(FIPS == clicked_fips) %>% pull(Locality) %>% unique() %>% first()
     
-    # ==============================
-    # 4. Year-specific maps
-    # ==============================
-    filtered_data_childcare <- reactive({
-      childcare_data %>% filter(year == input$year)
-    })
-    
-    merged_data <- reactive({
-      left_join(va_shape, filtered_data_childcare(), by = "FIPS")
-    })
-    
-    output$map <- renderLeaflet({
-      req(input$data_type)
-      df <- merged_data()
-      var <- input$data_type
-      
-      bins <- map_bins_fn(var, df[[var]])
-      pal <- colorBin(palette = map_palette, domain = df[[var]], bins = bins, na.color = "gray")
-      
-      
-      leaflet(df) %>%
-        addProviderTiles(providers$CartoDB.Positron) %>%
-        addPolygons(
-          layerId = ~FIPS,
-          fillColor = ~pal(get(var)),
-          weight = 1,
-          color = "white",
-          fillOpacity = 0.7,
-          label = poly_label(df, var),
-          labelOptions = labelOptions(direction = "auto"),
-          highlight = highlightOptions(weight = 2, color = "#666", fillOpacity = 0.9)
-        ) %>%
-        addLegend("bottomright", pal = pal, values = df[[var]],
-                  title = ifelse(var == "Avg_Expenditures", 
-                                 "Avg Expenditures", 
-                                 "Total Count on Subsidies"), opacity = 1)
-    })
-    
-    # ==============================
-    # 5. Trend map
-    # ==============================
-    output$trend_map <- renderLeaflet({
-      req(input$trend_var)
-      var <- input$trend_var
-      
-      summary_df <- childcare_data %>%
-        group_by(FIPS) %>%
-        summarise(
-          Avg_Total_Count = mean(Avg_Total_Count, na.rm = TRUE),
-          Avg_Expenditures = mean(Avg_Expenditures, na.rm = TRUE),
-          .groups = "drop"
-        )
-      
-      df <- left_join(va_shape, summary_df, by = "FIPS")
-      bins <- map_bins_fn(var)
-      pal <- colorBin(palette = map_palette, domain = df[[var]], bins = bins, na.color = "gray")
-      
-      leaflet(df) %>%
-        addProviderTiles(providers$CartoDB.Positron) %>%
-        addPolygons(
-          layerId = ~FIPS,
-          fillColor = ~pal(get(var)),
-          weight = 1,
-          color = "white",
-          fillOpacity = 0.7,
-          label = poly_label(df, var),
-          labelOptions = labelOptions(direction = "auto"),
-          highlight = highlightOptions(weight = 2, color = "#666", fillOpacity = 0.9)
-        ) %>%
-        addLegend("bottomright", pal = pal, values = df[[var]],
-                  title = ifelse(var == "Avg_Expenditures", 
-                                 "Avg Expenditures", 
-                                 "Total Count on Subsidies"), opacity = 1)
-    })
-    
-    # ==============================
-    # 6. Year-specific bar plot
-    # ==============================
-    output$year_specific_plot <- renderPlotly({
-      locs <- selected_counties()
-      req(input$data_type)
-      if (length(locs) == 0) return(NULL)
-      
-      df <- childcare_data %>%
-        filter(year == input$year, Locality %in% locs)
-      
-      if (input$data_type == "Avg_Total_Count") {
-        df <- df %>% mutate(hover_txt = paste0(Locality, "<br>Total Count: ", fmt_count(Avg_Total_Count)))
-        y_lab <- "Total Count on Subsidies"
+    if (!is.null(clicked_name)) {
+      updated <- if (clicked_name %in% selected_counties()) {
+        setdiff(selected_counties(), clicked_name)
       } else {
-        df <- df %>% mutate(hover_txt = paste0(Locality, "<br>Expenditures: ", fmt_dollar(Avg_Expenditures)))
-        y_lab <- "Expenditures (USD)"
+        union(selected_counties(), clicked_name)
       }
-      
-      g <- ggplot(df, aes(x = reorder(Locality, .data[[input$data_type]]), 
-                          y = .data[[input$data_type]], 
-                          fill = Locality,
-                          text = hover_txt)) +
-        geom_col() +
-        labs(
-          title = paste("Selected County", y_lab, "in", input$year),
-          x = "County", y = y_lab
-        ) +
-        scale_fill_manual(values = rep(map_palette, length.out = length(unique(df$Locality)))) +
-        theme_minimal(base_family = "Times New Roman") +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")
-      
-      ggplotly(g, tooltip = "text")
-    })
+      selected_counties(updated)
+      updateSelectizeInput(session, "county_picker", selected = updated)
+    }
+  })
+  
+  observeEvent(input$county_picker, { selected_counties(input$county_picker) })
+  
+  observe({
+    req(input$year2, input$data_type2)
     
-    # ==============================
-    # 7. Multi-county trend plot
-    # ==============================
-    output$multi_county_plot <- renderPlotly({
-      locs <- selected_counties()
-      req(input$trend_var)
-      if (length(locs) == 0) return(NULL)
-      
-      plot_data <- childcare_data %>% filter(Locality %in% locs)
-      
-      plot_long <- plot_data %>%
-        select(Locality, year, Avg_Total_Count, Avg_Expenditures) %>%
-        pivot_longer(cols = c("Avg_Total_Count", "Avg_Expenditures"),
-                     names_to = "Metric", values_to = "Value") %>%
-        filter(Metric == input$trend_var) %>%
-        mutate(
-          Metric_label = case_when(
-            Metric == "Avg_Total_Count" ~ "Total Count on Subsidies",
-            Metric == "Avg_Expenditures" ~ "Expenditures (USD)"
-          ),
-          hover_txt = case_when(
-            Metric == "Avg_Total_Count" ~ paste0(Locality, "<br>Year: ", year, "<br>Total Count: ", fmt_count(Value)),
-            Metric == "Avg_Expenditures" ~ paste0(Locality, "<br>Year: ", year, "<br>Expenditures: ", fmt_dollar(Value))
-          )
-        )
-      
-      g <- ggplot(plot_long, aes(x = year, y = Value, color = Locality, group = Locality, text = hover_txt)) +
-        geom_line(size = 1.2, na.rm = TRUE) +
-        geom_point(size = 2, na.rm = TRUE) +
-        labs(
-          title = paste("Trend of", unique(plot_long$Metric_label), "by County"),
-          x = "Year", y = unique(plot_long$Metric_label),
-          color = "County"
-        ) +
-        scale_color_manual(values = rep(map_palette, length.out = length(unique(plot_long$Locality)))) +
-        theme_minimal(base_family = "Times New Roman")
-      
-      ggplotly(g, tooltip = "text") %>% layout(legend = list(orientation = "h", x = 0, y = -0.2))
-    })
+    valid_choices <- valid_county_choices2()
+    new_selected <- intersect(selected_counties2(), valid_choices)
+    selected_counties2(new_selected)
     
-    # ==============================
-    # 8. Duplicate logic for the 2nd tab (map2, trend_map2, plots2)
-    # ==============================
+    updateSelectizeInput(
+      session,
+      "county_picker2",
+      choices = valid_choices,
+      selected = new_selected
+    )
+  })
+  
+  
+  observeEvent(input$reset_counties, {
+    selected_counties(character(0))
+    updateSelectizeInput(session, "county_picker", selected = character(0))
+  })
+  
+  # ==============================
+  # 2. Counties selected for new maps (second tab)
+  # ==============================
+  selected_counties2 <- reactiveVal(character(0))
+  
+  observeEvent(input$map2_shape_click, {
+    clicked_fips <- input$map2_shape_click$id
+    clicked_name <- childcare_data %>%
+      filter(FIPS == clicked_fips) %>% pull(Locality) %>% unique() %>% first()
     
-    filtered_data_childcare2 <- reactive({
-      childcare_data %>% filter(year == input$year2)
-    })
-    
-    merged_data2 <- reactive({
-      left_join(va_shape, filtered_data_childcare2(), by = "FIPS")
-    })
-    
-    # Year-specific map2
-    valid_county_choices2 <- reactive({
-      req(input$year2, input$data_type2)
-      
-      df <- merged_data2()  # this is the map-joined data for the selected year
-      df %>%
-        filter(!is.na(.data[[input$data_type2]])) %>%
-        pull(Locality) %>%
-        unique() %>%
-        sort()
-    })
-    
-    output$map2 <- renderLeaflet({
-      req(input$data_type2)
-      df <- merged_data2()
-      var <- input$data_type2
-      
-      bins <- map_bins_fn(var)
-      pal <- colorBin(palette = map_palette, domain = df[[var]], bins = bins, na.color = "gray")
-      
-      leaflet(df) %>%
-        addProviderTiles(providers$CartoDB.Positron) %>%
-        addPolygons(
-          layerId = ~FIPS,
-          fillColor = ~pal(get(var)),
-          weight = 1,
-          color = "white",
-          fillOpacity = 0.7,
-          label = poly_label(df, var),
-          labelOptions = labelOptions(direction = "auto"),
-          highlight = highlightOptions(weight = 2, color = "#666", fillOpacity = 0.9)
-        ) %>%
-        addLegend("bottomright", pal = pal, values = df[[var]],
-                  title = ifelse(var == "Avg_Expenditures", 
-                                 "Avg Expenditures", 
-                                 "Total Count on Subsidies"), opacity = 1)
-    })
-    
-    # Trend map2
-    output$trend_map2 <- renderLeaflet({
-      req(input$trend_var2)
-      var <- input$trend_var2
-      
-      summary_df <- childcare_data %>%
-        group_by(FIPS) %>%
-        summarise(
-          Avg_Total_Count = mean(Avg_Total_Count, na.rm = TRUE),
-          Avg_Expenditures = mean(Avg_Expenditures, na.rm = TRUE),
-          .groups = "drop"
-        )
-      
-      df <- left_join(va_shape, summary_df, by = "FIPS")
-      bins <- map_bins_fn(var)
-      pal <- colorBin(palette = map_palette, domain = df[[var]], bins = bins, na.color = "gray")
-      
-      leaflet(df) %>%
-        addProviderTiles(providers$CartoDB.Positron) %>%
-        addPolygons(
-          layerId = ~FIPS,
-          fillColor = ~pal(get(var)),
-          weight = 1,
-          color = "white",
-          fillOpacity = 0.7,
-          label = poly_label(df, var),
-          labelOptions = labelOptions(direction = "auto"),
-          highlight = highlightOptions(weight = 2, color = "#666", fillOpacity = 0.9)
-        ) %>%
-        addLegend("bottomright", pal = pal, values = df[[var]],
-                  title = ifelse(var == "Avg_Expenditures", 
-                                 "Avg Expenditures", 
-                                 "Total Count on Subsidies"), opacity = 1)
-    })
-    
-    # Bar plot2
-    output$year_specific_plot2 <- renderPlotly({
-      locs <- selected_counties2()
-      req(input$data_type2)
-      if (length(locs) == 0) return(NULL)
-      
-      df <- childcare_data %>%
-        filter(year == input$year2, Locality %in% locs)
-      
-      if (input$data_type2 == "Avg_Total_Count") {
-        df <- df %>% mutate(hover_txt = paste0(Locality, "<br>Total Count: ", fmt_count(Avg_Total_Count)))
-        y_lab <- "Total Count on Subsidies"
+    if (!is.null(clicked_name)) {
+      updated <- if (clicked_name %in% selected_counties2()) {
+        setdiff(selected_counties2(), clicked_name)
       } else {
-        df <- df %>% mutate(hover_txt = paste0(Locality, "<br>Expenditures: ", fmt_dollar(Avg_Expenditures)))
-        y_lab <- "Expenditures (USD)"
+        union(selected_counties2(), clicked_name)
       }
-      
-      g <- ggplot(df, aes(x = reorder(Locality, .data[[input$data_type2]]), 
-                          y = .data[[input$data_type2]], 
-                          fill = Locality,
-                          text = hover_txt)) +
-        geom_col() +
-        labs(
-          title = paste("Selected County", y_lab, "in", input$year2),
-          x = "County", y = y_lab
-        ) +
-        scale_fill_manual(values = rep(map_palette, length.out = length(unique(df$Locality)))) +
-        theme_minimal(base_family = "Times New Roman") +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")
-      
-      ggplotly(g, tooltip = "text")
-    })
+      selected_counties2(updated)
+      updateSelectizeInput(session, "county_picker2", selected = updated)
+    }
+  })
+  
+  observeEvent(input$trend_map2_shape_click, {
+    clicked_fips <- input$trend_map2_shape_click$id
+    clicked_name <- childcare_data %>%
+      filter(FIPS == clicked_fips) %>% pull(Locality) %>% unique() %>% first()
     
-    # Multi-county trend plot2
-    output$multi_county_plot2 <- renderPlotly({
-      locs <- selected_counties2()
-      req(input$trend_var2)
-      if (length(locs) == 0) return(NULL)
-      
-      plot_data <- childcare_data %>% filter(Locality %in% locs)
-      
-      plot_long <- plot_data %>%
-        select(Locality, year, Avg_Total_Count, Avg_Expenditures) %>%
-        pivot_longer(cols = c("Avg_Total_Count", "Avg_Expenditures"),
-                     names_to = "Metric", values_to = "Value") %>%
-        filter(Metric == input$trend_var2) %>%
-        mutate(
-          Metric_label = case_when(
-            Metric == "Avg_Total_Count" ~ "Total Count on Subsidies",
-            Metric == "Avg_Expenditures" ~ "Expenditures (USD)"
-          ),
-          hover_txt = case_when(
-            Metric == "Avg_Total_Count" ~ paste0(Locality, "<br>Year: ", year, "<br>Total Count: ", fmt_count(Value)),
-            Metric == "Avg_Expenditures" ~ paste0(Locality, "<br>Year: ", year, "<br>Expenditures: ", fmt_dollar(Value))
-          )
-        )
-      
-      g <- ggplot(plot_long, aes(x = year, y = Value, color = Locality, group = Locality, text = hover_txt)) +
-        geom_line(size = 1.2, na.rm = TRUE) +
-        geom_point(size = 2, na.rm = TRUE) +
-        labs(
-          title = paste("Trend of", unique(plot_long$Metric_label), "by County"),
-          x = "Year", y = unique(plot_long$Metric_label),
-          color = "County"
-        ) +
-        scale_color_manual(values = rep(map_palette, length.out = length(unique(plot_long$Locality)))) +
-        theme_minimal(base_family = "Times New Roman")
-      
-      ggplotly(g, tooltip = "text") %>% layout(legend = list(orientation = "h", x = 0, y = -0.2))
-    })
+    if (!is.null(clicked_name)) {
+      updated <- if (clicked_name %in% selected_counties2()) {
+        setdiff(selected_counties2(), clicked_name)
+      } else {
+        union(selected_counties2(), clicked_name)
+      }
+      selected_counties2(updated)
+      updateSelectizeInput(session, "county_picker2", selected = updated)
+    }
+  })
+  
+  observeEvent(input$county_picker2, { selected_counties2(input$county_picker2) })
+  
+  observeEvent(input$reset_counties2, {
+    selected_counties2(character(0))
+    updateSelectizeInput(session, "county_picker2", selected = character(0))
+  })
+  
+  # ==============================
+  # 3. Shared helper functions
+  # ==============================
+  poly_label <- function(df, varname) {
+    val_fmt <- if (varname == "Avg_Expenditures") fmt_dollar else fmt_count
+    paste0("<strong>", df$NAME, "</strong><br/>",
+           ifelse(varname == "Avg_Expenditures", 
+                  "Avg Expenditures: ", "Total Count on Subsidies: "),
+           ifelse(is.na(df[[varname]]), "NA", val_fmt(df[[varname]]))) %>%
+      lapply(htmltools::HTML)
   }
   
-
+  # ==============================
+  # 4. Year-specific maps
+  # ==============================
+  filtered_data_childcare <- reactive({
+    childcare_data %>% filter(year == input$year)
+  })
   
-
+  merged_data <- reactive({
+    left_join(va_shape, filtered_data_childcare(), by = "FIPS")
+  })
+  
+  output$map <- renderLeaflet({
+    req(input$data_type)
+    df <- merged_data()
+    var <- input$data_type
     
+    bins <- map_bins_fn(var, df[[var]])
+    pal <- colorBin(palette = map_palette, domain = df[[var]], bins = bins, na.color = "gray")
+    
+    
+    leaflet(df) %>%
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addPolygons(
+        layerId = ~FIPS,
+        fillColor = ~pal(get(var)),
+        weight = 1,
+        color = "white",
+        fillOpacity = 0.7,
+        label = poly_label(df, var),
+        labelOptions = labelOptions(direction = "auto"),
+        highlight = highlightOptions(weight = 2, color = "#666", fillOpacity = 0.9)
+      ) %>%
+      addLegend("bottomright", pal = pal, values = df[[var]],
+                title = ifelse(var == "Avg_Expenditures", 
+                               "Avg Expenditures", 
+                               "Total Count on Subsidies"), opacity = 1)
+  })
+  
+  # ==============================
+  # 5. Trend map
+  # ==============================
+  output$trend_map <- renderLeaflet({
+    req(input$trend_var)
+    var <- input$trend_var
+    
+    summary_df <- childcare_data %>%
+      group_by(FIPS) %>%
+      summarise(
+        Avg_Total_Count = mean(Avg_Total_Count, na.rm = TRUE),
+        Avg_Expenditures = mean(Avg_Expenditures, na.rm = TRUE),
+        .groups = "drop"
+      )
+    
+    df <- left_join(va_shape, summary_df, by = "FIPS")
+    bins <- map_bins_fn(var)
+    pal <- colorBin(palette = map_palette, domain = df[[var]], bins = bins, na.color = "gray")
+    
+    leaflet(df) %>%
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addPolygons(
+        layerId = ~FIPS,
+        fillColor = ~pal(get(var)),
+        weight = 1,
+        color = "white",
+        fillOpacity = 0.7,
+        label = poly_label(df, var),
+        labelOptions = labelOptions(direction = "auto"),
+        highlight = highlightOptions(weight = 2, color = "#666", fillOpacity = 0.9)
+      ) %>%
+      addLegend("bottomright", pal = pal, values = df[[var]],
+                title = ifelse(var == "Avg_Expenditures", 
+                               "Avg Expenditures", 
+                               "Total Count on Subsidies"), opacity = 1)
+  })
+  
+  # ==============================
+  # 6. Year-specific bar plot
+  # ==============================
+  output$year_specific_plot <- renderPlotly({
+    locs <- selected_counties()
+    req(input$data_type)
+    if (length(locs) == 0) return(NULL)
+    
+    df <- childcare_data %>%
+      filter(year == input$year, Locality %in% locs)
+    
+    if (input$data_type == "Avg_Total_Count") {
+      df <- df %>% mutate(hover_txt = paste0(Locality, "<br>Total Count: ", fmt_count(Avg_Total_Count)))
+      y_lab <- "Total Count on Subsidies"
+    } else {
+      df <- df %>% mutate(hover_txt = paste0(Locality, "<br>Expenditures: ", fmt_dollar(Avg_Expenditures)))
+      y_lab <- "Expenditures (USD)"
+    }
+    
+    g <- ggplot(df, aes(x = reorder(Locality, .data[[input$data_type]]), 
+                        y = .data[[input$data_type]], 
+                        fill = Locality,
+                        text = hover_txt)) +
+      geom_col() +
+      labs(
+        title = paste("Selected County", y_lab, "in", input$year),
+        x = "County", y = y_lab
+      ) +
+      scale_fill_manual(values = rep(map_palette, length.out = length(unique(df$Locality)))) +
+      theme_minimal(base_family = "Times New Roman") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")
+    
+    ggplotly(g, tooltip = "text")
+  })
+  
+  # ==============================
+  # 7. Multi-county trend plot
+  # ==============================
+  output$multi_county_plot <- renderPlotly({
+    locs <- selected_counties()
+    req(input$trend_var)
+    if (length(locs) == 0) return(NULL)
+    
+    plot_data <- childcare_data %>% filter(Locality %in% locs)
+    
+    plot_long <- plot_data %>%
+      select(Locality, year, Avg_Total_Count, Avg_Expenditures) %>%
+      pivot_longer(cols = c("Avg_Total_Count", "Avg_Expenditures"),
+                   names_to = "Metric", values_to = "Value") %>%
+      filter(Metric == input$trend_var) %>%
+      mutate(
+        Metric_label = case_when(
+          Metric == "Avg_Total_Count" ~ "Total Count on Subsidies",
+          Metric == "Avg_Expenditures" ~ "Expenditures (USD)"
+        ),
+        hover_txt = case_when(
+          Metric == "Avg_Total_Count" ~ paste0(Locality, "<br>Year: ", year, "<br>Total Count: ", fmt_count(Value)),
+          Metric == "Avg_Expenditures" ~ paste0(Locality, "<br>Year: ", year, "<br>Expenditures: ", fmt_dollar(Value))
+        )
+      )
+    
+    g <- ggplot(plot_long, aes(x = year, y = Value, color = Locality, group = Locality, text = hover_txt)) +
+      geom_line(size = 1.2, na.rm = TRUE) +
+      geom_point(size = 2, na.rm = TRUE) +
+      labs(
+        title = paste("Trend of", unique(plot_long$Metric_label), "by County"),
+        x = "Year", y = unique(plot_long$Metric_label),
+        color = "County"
+      ) +
+      scale_color_manual(values = rep(map_palette, length.out = length(unique(plot_long$Locality)))) +
+      theme_minimal(base_family = "Times New Roman")
+    
+    ggplotly(g, tooltip = "text") %>% layout(legend = list(orientation = "h", x = 0, y = -0.2))
+  })
+  
+  # ==============================
+  # 8. Duplicate logic for the 2nd tab (map2, trend_map2, plots2)
+  # ==============================
+  
+  filtered_data_childcare2 <- reactive({
+    childcare_data %>% filter(year == input$year2)
+  })
+  
+  merged_data2 <- reactive({
+    left_join(va_shape, filtered_data_childcare2(), by = "FIPS")
+  })
+  
+  # Year-specific map2
+  valid_county_choices2 <- reactive({
+    req(input$year2, input$data_type2)
+    
+    df <- merged_data2()  # this is the map-joined data for the selected year
+    df %>%
+      filter(!is.na(.data[[input$data_type2]])) %>%
+      pull(Locality) %>%
+      unique() %>%
+      sort()
+  })
+  
+  output$map2 <- renderLeaflet({
+    req(input$data_type2)
+    df <- merged_data2()
+    var <- input$data_type2
+    
+    bins <- map_bins_fn(var)
+    pal <- colorBin(palette = map_palette, domain = df[[var]], bins = bins, na.color = "gray")
+    
+    leaflet(df) %>%
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addPolygons(
+        layerId = ~FIPS,
+        fillColor = ~pal(get(var)),
+        weight = 1,
+        color = "white",
+        fillOpacity = 0.7,
+        label = poly_label(df, var),
+        labelOptions = labelOptions(direction = "auto"),
+        highlight = highlightOptions(weight = 2, color = "#666", fillOpacity = 0.9)
+      ) %>%
+      addLegend("bottomright", pal = pal, values = df[[var]],
+                title = ifelse(var == "Avg_Expenditures", 
+                               "Avg Expenditures", 
+                               "Total Count on Subsidies"), opacity = 1)
+  })
+  
+  # Trend map2
+  output$trend_map2 <- renderLeaflet({
+    req(input$trend_var2)
+    var <- input$trend_var2
+    
+    summary_df <- childcare_data %>%
+      group_by(FIPS) %>%
+      summarise(
+        Avg_Total_Count = mean(Avg_Total_Count, na.rm = TRUE),
+        Avg_Expenditures = mean(Avg_Expenditures, na.rm = TRUE),
+        .groups = "drop"
+      )
+    
+    df <- left_join(va_shape, summary_df, by = "FIPS")
+    bins <- map_bins_fn(var)
+    pal <- colorBin(palette = map_palette, domain = df[[var]], bins = bins, na.color = "gray")
+    
+    leaflet(df) %>%
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addPolygons(
+        layerId = ~FIPS,
+        fillColor = ~pal(get(var)),
+        weight = 1,
+        color = "white",
+        fillOpacity = 0.7,
+        label = poly_label(df, var),
+        labelOptions = labelOptions(direction = "auto"),
+        highlight = highlightOptions(weight = 2, color = "#666", fillOpacity = 0.9)
+      ) %>%
+      addLegend("bottomright", pal = pal, values = df[[var]],
+                title = ifelse(var == "Avg_Expenditures", 
+                               "Avg Expenditures", 
+                               "Total Count on Subsidies"), opacity = 1)
+  })
+  
+  # Bar plot2
+  output$year_specific_plot2 <- renderPlotly({
+    locs <- selected_counties2()
+    req(input$data_type2)
+    if (length(locs) == 0) return(NULL)
+    
+    df <- childcare_data %>%
+      filter(year == input$year2, Locality %in% locs)
+    
+    if (input$data_type2 == "Avg_Total_Count") {
+      df <- df %>% mutate(hover_txt = paste0(Locality, "<br>Total Count: ", fmt_count(Avg_Total_Count)))
+      y_lab <- "Total Count on Subsidies"
+    } else {
+      df <- df %>% mutate(hover_txt = paste0(Locality, "<br>Expenditures: ", fmt_dollar(Avg_Expenditures)))
+      y_lab <- "Expenditures (USD)"
+    }
+    
+    g <- ggplot(df, aes(x = reorder(Locality, .data[[input$data_type2]]), 
+                        y = .data[[input$data_type2]], 
+                        fill = Locality,
+                        text = hover_txt)) +
+      geom_col() +
+      labs(
+        title = paste("Selected County", y_lab, "in", input$year2),
+        x = "County", y = y_lab
+      ) +
+      scale_fill_manual(values = rep(map_palette, length.out = length(unique(df$Locality)))) +
+      theme_minimal(base_family = "Times New Roman") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none")
+    
+    ggplotly(g, tooltip = "text")
+  })
+  
+  # Multi-county trend plot2
+  output$multi_county_plot2 <- renderPlotly({
+    locs <- selected_counties2()
+    req(input$trend_var2)
+    if (length(locs) == 0) return(NULL)
+    
+    plot_data <- childcare_data %>% filter(Locality %in% locs)
+    
+    plot_long <- plot_data %>%
+      select(Locality, year, Avg_Total_Count, Avg_Expenditures) %>%
+      pivot_longer(cols = c("Avg_Total_Count", "Avg_Expenditures"),
+                   names_to = "Metric", values_to = "Value") %>%
+      filter(Metric == input$trend_var2) %>%
+      mutate(
+        Metric_label = case_when(
+          Metric == "Avg_Total_Count" ~ "Total Count on Subsidies",
+          Metric == "Avg_Expenditures" ~ "Expenditures (USD)"
+        ),
+        hover_txt = case_when(
+          Metric == "Avg_Total_Count" ~ paste0(Locality, "<br>Year: ", year, "<br>Total Count: ", fmt_count(Value)),
+          Metric == "Avg_Expenditures" ~ paste0(Locality, "<br>Year: ", year, "<br>Expenditures: ", fmt_dollar(Value))
+        )
+      )
+    
+    g <- ggplot(plot_long, aes(x = year, y = Value, color = Locality, group = Locality, text = hover_txt)) +
+      geom_line(size = 1.2, na.rm = TRUE) +
+      geom_point(size = 2, na.rm = TRUE) +
+      labs(
+        title = paste("Trend of", unique(plot_long$Metric_label), "by County"),
+        x = "Year", y = unique(plot_long$Metric_label),
+        color = "County"
+      ) +
+      scale_color_manual(values = rep(map_palette, length.out = length(unique(plot_long$Locality)))) +
+      theme_minimal(base_family = "Times New Roman")
+    
+    ggplotly(g, tooltip = "text") %>% layout(legend = list(orientation = "h", x = 0, y = -0.2))
+  })
+}
+
+
+
+
+
 
 # Run App -----------------------------------------------------------------
 shinyApp(ui = ui, server = server)
+
 
 
 
