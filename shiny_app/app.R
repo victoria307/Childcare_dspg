@@ -384,7 +384,6 @@ $$")
                           )
                         ),
                         mainPanel(
-                          h4(tags$strong("Regression Output")),
                           tags$figure(
                             img(
                               src = "images/MachineLearningModel.png",
