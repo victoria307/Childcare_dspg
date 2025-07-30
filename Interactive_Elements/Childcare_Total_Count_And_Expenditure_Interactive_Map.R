@@ -122,6 +122,41 @@ server <- function(input, output, session) {
   # Store selected counties in a reactiveVal ---------------------------------
   selected_counties <- reactiveVal(character(0))
   
+  # Reactive for valid county choices based on non-NA data -------------------
+  valid_county_choices <- reactive({
+    req(input$year, input$data_type)
+    
+    # Filter for the selected year and non-NA values
+    valid_locs <- childcare_data %>%
+      filter(year == input$year) %>%
+      filter(!is.na(.data[[input$data_type]])) %>%
+      pull(Locality) %>%
+      unique()
+    
+    # Return only those counties that exist in the shape file as well
+    intersect(valid_locs, va_shape$NAME) %>% sort()
+  })
+  
+  
+  # Observe to update county picker based on valid counties ------------------
+  observe({
+    req(input$year, input$data_type)
+    
+    valid_choices <- valid_county_choices()
+    print(valid_choices)  # for debugging
+    
+    new_selected <- intersect(selected_counties(), valid_choices)
+    selected_counties(new_selected)
+    updateSelectizeInput(
+      session,
+      "county_picker",
+      choices = valid_choices,
+      selected = new_selected
+    )
+  })
+  
+  
+  
   # Map click (Year-Specific View) --------------------------------------------
   observeEvent(input$map_shape_click, {
     clicked_fips <- input$map_shape_click$id
@@ -165,15 +200,24 @@ server <- function(input, output, session) {
   })
   
   # Sync picker -> selected_counties ------------------------------------------
+  # Sync picker -> selected_counties
   observeEvent(input$county_picker, {
     selected_counties(input$county_picker)
   })
   
-  # Reset ---------------------------------------------------------------------
-  observeEvent(input$reset_counties, {
-    selected_counties(character(0))
-    updateSelectizeInput(session, "county_picker", selected = character(0))
+  # ADD THIS: Dynamically update choices to exclude counties with NA values
+  observe({
+    valid_choices <- valid_county_choices()
+    new_selected <- intersect(selected_counties(), valid_choices)
+    selected_counties(new_selected)  # update the reactiveVal
+    updateSelectizeInput(
+      session,
+      "county_picker",
+      choices = valid_choices,
+      selected = new_selected
+    )
   })
+  
   
   # Year-filtered data ---------------------------------------------------------
   filtered_data <- reactive({
@@ -223,7 +267,7 @@ server <- function(input, output, session) {
   # Trend Map (averaged across all years) --------------------------------------
   output$trend_map <- renderLeaflet({
     req(input$trend_var)
-    var <- input$trend_var  # use selected metric to shade map
+    var <- input$trend_var
     
     summary_df <- childcare_data %>%
       group_by(FIPS) %>%
@@ -262,7 +306,6 @@ server <- function(input, output, session) {
     df <- childcare_data %>%
       filter(year == input$year, Locality %in% locs)
     
-    # Build custom text for hover
     if (input$data_type == "Avg_Total_Count") {
       df <- df %>% mutate(hover_txt = paste0(Locality, "<br>Facility Count: ", fmt_count(Avg_Total_Count)))
       y_lab <- "Facility Count"
@@ -326,8 +369,8 @@ server <- function(input, output, session) {
     
     ggplotly(g, tooltip = "text") %>% layout(legend = list(orientation = "h", x = 0, y = -0.2))
   })
-  
 }
+
 
 # Run App ---------------------------------------------------------------
 shinyApp(ui, server)
