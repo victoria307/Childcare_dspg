@@ -8,10 +8,10 @@ library(readxl)
 library(plotly)
 library(viridisLite)
 
-# Load and preprocess data
-data <- read_excel("Interactive_Elements/RFModel_Data_For_Factors_On_Female_Employment.xlsx")
 
-model_data <- data %>%
+employment_cost_df <- read_excel("Interactive_Elements/RFModel_Data_For_Factors_On_Female_Employment.xlsx")
+
+selected_model_df <- employment_cost_df %>%
   select(
     femr_20to64,
     mcinfant, mfccinfant, 
@@ -24,38 +24,36 @@ model_data <- data %>%
   na.omit()
 
 
-# Train-test split
 set.seed(123)
-train_index <- createDataPartition(model_data$femr_20to64, p = 0.8, list = FALSE)
-train_data <- model_data[train_index, ]
-test_data <- model_data[-train_index, ]
+training_indices <- createDataPartition(selected_model_df$femr_20to64, p = 0.8, list = FALSE)
+training_data <- selected_model_df[training_indices, ]
+testing_data <- selected_model_df[-training_indices, ]
 
-# Train Random Forest model
-rf_model <- randomForest(
+
+female_employment_rf <- randomForest(
   femr_20to64 ~ .,
-  data = train_data,
+  data = training_data,
   importance = TRUE,
   ntree = 500
 )
 
-# Predict and evaluate
-predictions <- predict(rf_model, test_data)
-rmse <- sqrt(mean((predictions - test_data$femr_20to64)^2))
+rf_predictions <- predict(female_employment_rf, testing_data)
+rf_rmse <- sqrt(mean((rf_predictions - testing_data$femr_20to64)^2))
 
-# Get and format importance
-importance_values <- importance(rf_model)
-importance_df <- as.data.frame(importance_values)
-importance_df$Variable <- rownames(importance_df)
 
-importance_sorted <- importance_df %>%
+rf_importance_raw <- importance(female_employment_rf)
+rf_importance_df <- as.data.frame(rf_importance_raw)
+rf_importance_df$Variable <- rownames(rf_importance_df)
+
+rf_importance_sorted <- rf_importance_df %>%
   arrange(desc(`%IncMSE`)) %>%
   rename(
     Increase_in_Error_Percent = `%IncMSE`,
     Node_Purity_Contribution = IncNodePurity
   )
 
-# Add readable variable names
-labels <- c(
+
+variable_labels <- c(
   "mcinfant" = "Infant Center Cost",
   "mfccinfant" = "Infant Family Childcare Cost",
   "mctoddler" = "Toddler Center Cost",
@@ -72,7 +70,7 @@ labels <- c(
   "h_under6_singlem" = "Single Moms w/ Kids <6",
   "h_under6_bothwork" = "Both Parents Working w/ Kids <6"
 )
-importance_sorted$Clean_Var <- labels[importance_sorted$Variable]
+rf_importance_sorted$Clean_Var <- variable_labels[rf_importance_sorted$Variable]
 
 # Define UI
 ui <- fluidPage(
@@ -111,7 +109,7 @@ server <- function(input, output, session) {
     bar_color <- "#2e708c"  # dashboard-matching blue
     
     plot_ly(
-      data = importance_sorted,
+      data = rf_importance_sorted,
       x = ~Increase_in_Error_Percent,
       y = ~reorder(Clean_Var, Increase_in_Error_Percent),
       type = 'bar',
