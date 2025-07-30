@@ -1,3 +1,6 @@
+rm(list=ls())
+cat("\014")
+
 # Load Packages ---------------------------------------------------------
 library(shiny)
 library(tidyverse)
@@ -178,7 +181,7 @@ map_bins_fn <- function(var, values) {
     return(c(0, 10000, 50000, 100000, 250000, 500000, 1000000, 1500000, 2000000, Inf))
   } else {
     return(pretty(values, n = 7))  # fallback for other metrics
-  }
+  }}
   
 #Rural urban cost map-------
   RUdata <- read_excel("Data/Cleaned_Virginia_Womens_Bureau.xlsx", na = c("NA", "n/a", "", "-")) %>%
@@ -195,7 +198,7 @@ map_bins_fn <- function(var, values) {
   va_map <- counties(state = "VA", cb = TRUE, class = "sf") %>%
     mutate(FIPS = str_pad(as.character(GEOID), 5, pad = "0"))
   
-}
+
 
 
 
