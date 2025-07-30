@@ -73,7 +73,7 @@ ui <- fluidPage(
     "))
   ),
   
-  h2("Virginia Childcare Cost and Facility Count Map"),
+  h2("Virginia Childcare Cost and Total Count Map"),
   
   sidebarLayout(
     sidebarPanel(
@@ -82,13 +82,13 @@ ui <- fluidPage(
         condition = "input.tabs == 'year_view'",
         selectInput("year", "Select Year:", choices = sort(unique(childcare_data$year)), selected = max(childcare_data$year)),
         selectInput("data_type", "Select Data Type:",
-                    choices = c("Average Facility Count" = "Avg_Total_Count",
+                    choices = c("Average Total Count" = "Avg_Total_Count",
                                 "Average Expenditures (USD)" = "Avg_Expenditures"))
       ),
       conditionalPanel(
         condition = "input.tabs == 'trend_view'",
         selectInput("trend_var", "Select a metric to show in time trend:",
-                    choices = c("Facility Count" = "Avg_Total_Count",
+                    choices = c("Total Count" = "Avg_Total_Count",
                                 "Expenditures (USD)" = "Avg_Expenditures"),
                     selected = "Avg_Total_Count")
         
@@ -331,3 +331,4 @@ server <- function(input, output, session) {
 
 # Run App ---------------------------------------------------------------
 shinyApp(ui, server)
+

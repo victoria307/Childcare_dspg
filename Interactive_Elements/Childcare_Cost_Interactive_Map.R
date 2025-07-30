@@ -53,6 +53,103 @@ ui <- fluidPage(
         margin-bottom: 15px;
       }"))
   ),
+  tabPanel("Childcare Cost & Female Labor Force Participation",
+           fluidPage(
+             # Styling
+             tags$head(
+               tags$style(HTML("
+               body {
+                 background-color: #ffffff;
+                 font-family: 'Times New Roman', serif;
+               }
+               h2 {
+                 color: #333333;
+                 font-size: 32px;
+                 font-weight: bold;
+                 text-align: center;
+                 margin-bottom: 20px;
+               }
+               .sidebar {
+                 background-color: #d3ebf5;
+                 padding: 15px;
+                 border-radius: 5px;
+               }
+               .form-group {
+                 margin-bottom: 15px;
+               }"))
+             ),
+             
+             # Title
+             h2("Virginia Childcare Cost & Female Labor Force Participation"),
+             
+             # Layout
+             sidebarLayout(
+               sidebarPanel(
+                 class = "sidebar",
+                 
+                 selectInput("view_mode", "Choose View Mode:",
+                             choices = c("Single Year View" = "year", "Trend Over Time" = "trend"),
+                             selected = "year"),
+                 
+                 conditionalPanel(
+                   condition = "input.view_mode == 'year'",
+                   selectInput("year", "Select Year:",
+                               choices = sort(unique(data$STUDYYEAR[data$STUDYYEAR != 2008])))
+                 ),
+                 
+                 selectInput("map_type", "Choose Data to Display:",
+                             choices = c("Childcare Cost" = "cost", 
+                                         "Female Labor Force Participation (Under 6)" = "flfpr")),
+                 
+                 conditionalPanel(
+                   condition = "input.view_mode == 'year' && input.map_type == 'cost'",
+                   selectInput("cost_type", "Select Childcare Type:",
+                               choices = c("Infant Care" = "MCINFANT",
+                                           "Toddler Care" = "MCTODDLER",
+                                           "Preschool Care" = "MCPRESCHOOL"),
+                               selected = "MCINFANT")
+                 ),
+                 
+                 conditionalPanel(
+                   condition = "input.view_mode == 'trend' && input.map_type == 'cost'",
+                   checkboxGroupInput("trend_cost_types", "Select Childcare Types:",
+                                      choices = c("Infant Care" = "MCINFANT",
+                                                  "Toddler Care" = "MCTODDLER",
+                                                  "Preschool Care" = "MCPRESCHOOL"),
+                                      selected = c("MCINFANT", "MCTODDLER", "MCPRESCHOOL"))
+                 ),
+                 
+                 radioButtons("urban_filter", "Show Counties:",
+                              choices = c("All" = "all", "Urban Only" = "urban", "Rural Only" = "rural"),
+                              selected = "all"),
+                 
+                 conditionalPanel(
+                   condition = "input.view_mode == 'trend'",
+                   selectizeInput("county_picker", "Select Counties for Trend:", choices = NULL, multiple = TRUE)
+                 ),
+                 
+                 conditionalPanel(
+                   condition = "input.view_mode == 'trend'",
+                   actionButton("clear_county", "Clear County Selection", class = "btn btn-warning")
+                 ),
+                 
+                 helpText("Childcare costs reflect weekly, full-time median prices charged by providers."),
+                 helpText("In 'Trend Over Time' mode, select or click counties to compare trends.")
+               ),
+               
+               mainPanel(
+                 leafletOutput("map", height = "650px"),
+                 br(),
+                 conditionalPanel(
+                   condition = "input.view_mode == 'trend'",
+                   h4("Trend for Selected Counties",
+                      style = "text-align:center; font-weight:bold; font-family:'Times New Roman'"),
+                   plotlyOutput("trend_plot", height = "400px")
+                 )
+               )
+             )
+           )
+  ),
   
   h2("Virginia Childcare Cost & Female Labor Force Participation"),
   
