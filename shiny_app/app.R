@@ -16,8 +16,11 @@ library(DT)
 library(plotly)
 library(kableExtra)
 library(scales)
+library(randomForest)
+library(caret)
 library(viridisLite)
 library(RColorBrewer)
+
 
 options(tigris_use_cache = TRUE)
 
@@ -198,7 +201,71 @@ map_bins_fn <- function(var, values) {
   va_map <- counties(state = "VA", cb = TRUE, class = "sf") %>%
     mutate(FIPS = str_pad(as.character(GEOID), 5, pad = "0"))
   
-
+#RF analysis -------------
+  
+  
+  employment_cost_df <- read_excel("Data/RFModel_Data_For_Factors_On_Female_Employment.xlsx")
+  
+  selected_model_df <- employment_cost_df %>%
+    select(
+      femr_20to64,
+      mcinfant, mfccinfant, 
+      mctoddler, mfcctoddler,
+      mcpreschool, mfccpreschool,
+      mhi, mfi, pr_f, pr_p,
+      onerace_w, onerace_b, hispanic,
+      h_under6_singlem, h_under6_bothwork
+    ) %>%
+    na.omit()
+  
+  
+  set.seed(123)
+  training_indices <- createDataPartition(selected_model_df$femr_20to64, p = 0.8, list = FALSE)
+  training_data <- selected_model_df[training_indices, ]
+  testing_data <- selected_model_df[-training_indices, ]
+  
+  
+  female_employment_rf <- randomForest(
+    femr_20to64 ~ .,
+    data = training_data,
+    importance = TRUE,
+    ntree = 500
+  )
+  
+  rf_predictions <- predict(female_employment_rf, testing_data)
+  rf_rmse <- sqrt(mean((rf_predictions - testing_data$femr_20to64)^2))
+  
+  
+  rf_importance_raw <- importance(female_employment_rf)
+  rf_importance_df <- as.data.frame(rf_importance_raw)
+  rf_importance_df$Variable <- rownames(rf_importance_df)
+  
+  rf_importance_sorted <- rf_importance_df %>%
+    arrange(desc(`%IncMSE`)) %>%
+    rename(
+      Increase_in_Error_Percent = `%IncMSE`,
+      Node_Purity_Contribution = IncNodePurity
+    )
+  
+  
+  variable_labels <- c(
+    "mcinfant" = "Infant Center Cost",
+    "mfccinfant" = "Infant Family Childcare Cost",
+    "mctoddler" = "Toddler Center Cost",
+    "mfcctoddler" = "Toddler Family Childcare Cost",
+    "mcpreschool" = "Preschool Center Cost",
+    "mfccpreschool" = "Preschool Family Childcare Cost",
+    "mfi" = "Median Family Income",
+    "mhi" = "Median Household Income",
+    "pr_f" = "Poverty Rate (Families)",
+    "pr_p" = "Poverty Rate (Individuals)",
+    "onerace_w" = "White Population %",
+    "onerace_b" = "Black Population %",
+    "hispanic" = "Hispanic Population %",
+    "h_under6_singlem" = "Single Moms w/ Kids <6",
+    "h_under6_bothwork" = "Both Parents Working w/ Kids <6"
+  )
+  rf_importance_sorted$Clean_Var <- variable_labels[rf_importance_sorted$Variable]
 
 
 
@@ -269,7 +336,7 @@ ui <- navbarPage(
                column(
                  width = 6,
                  h4(     ),
-                 p("Since 2018, there have been many changes made to the eligibility of subsidies, particularly during and after the COVID-19 pandemic, both nationally and at the state level. In response to the crisis, $9.6 billion in federal funding was provided through the Coronavirus Response and Relief Supplemental Appropriations Act. Enabling the state of Virginia to temporarily expand eligibility and serve more families.The family income threshold was raised to 85% of the federal poverty line, and the eligibility requirements were expanded to parents actively searching for work to qualify for subsidies; an important change that supported families facing job loss or economic instability associated with the pandemic.During this time, copayments and waitlists for subsidies were eliminated. These two supportive measures have been rolled back in 2023 and 2024, respectively, due to budget constraints; however, the pandemic-era guideline for income requirements and job-seeking parents has remained as eligibility requirements for childcare assistance."),
+                 p("Since 2018, there have been many changes made to the eligibility of subsidies, particularly during and after the COVID-19 pandemic, both nationally and at the state level. In response to the crisis, $9.6 billion in federal funding was provided through the Coronavirus Response and Relief Supplemental Appropriations Act. Enabling the state of Virginia to temporarily expand eligibility and serve more families.The family income threshold was raised to 85% of the federal poverty line, and the eligibility requirements were expanded to parents actively searching for work to qualify for subsidies; an important change that supported families facing job loss or economic instability associated with the pandemic. During this time, copayments and waitlists for subsidies were eliminated. These two supportive measures have been rolled back in 2023 and 2024, respectively, due to budget constraints; however, the pandemic-era guideline for income requirements and job-seeking parents has remained as eligibility requirements for childcare assistance."),
                  h4("Research Questions:",
                     style = "font-weight:bold"),
                  tags$ul(
@@ -480,25 +547,60 @@ ui <- navbarPage(
   # Joshua Stuff ------------------------------------------------------------
   
   navbarMenu("Analysis",
-             tabPanel("Variables Important to Female Employment",
-                      fluidPage(
-                        h2("Variables Important to Female Employment"),
-                        sidebarLayout(
-                          sidebarPanel(
-                            h4("Methodology"),
-                            p("Describe your regression model, data sources, and sample size."),
-                            tags$ul(
-                              tags$li("Survey data from CPS and SIPP"),
-                              tags$li("DiD model with robust standard errors"),
-                              tags$li("Controls: age, education, number of children")
-                            )
-                          ),
-                          mainPanel(
-                            h4("Regression Output"),
-                            br(),
-                          )
-                        )
-                      )
+             tabPanel(
+               "Variables Important to Female Employment",
+               fluidPage(
+                 
+                 # --- Styling ------------------------------------------------------------
+                 tags$head(
+                   tags$style(HTML("
+        body {
+          background-color: #ffffff;
+          font-family: 'Times New Roman', serif;
+        }
+        h2 {
+          color: #333333;
+          font-size: 38px;
+          font-weight: bold;
+          text-align: center;
+          margin-bottom: 10px;
+        }
+        h4 {
+          font-family: 'Times New Roman', serif;
+          font-size: 20px;
+          text-align: center;
+          margin-bottom: 30px;
+        }
+      "))
+                 ),
+                 
+                 # --- Title --------------------------------------------------------------
+                 h2("What Drives Female Employment in Virginia?"),
+                 
+                 # --- Layout -------------------------------------------------------------
+                 sidebarLayout(
+                   
+                   # ―― Sticky sidebar with methodology ―――――――――――――――――――――――――――――――――
+                   sidebarPanel(
+                     div(
+                       style = "position: sticky; top: 80px;",
+                       
+                       h4(tags$strong("Methodology")),
+                       p("Using a Random Forest model, we assessed the relative predictive power of a wide set of economic, demographic, and childcare factors on female employment outcomes."),
+                      p("To identify the factors most predictive of female employment in Virginia, we implemented a Random Forest regression model using data from the  National Database of Childcare Prices (NDCP). The outcome variable was the female employment rate among women aged 20 to 64, and predictors included child care costs by provider type and age group, household income measures, poverty rates, and racial/ethnic and family structure indicators at the county level.
+After cleaning and filtering the dataset to remove missing values, we randomly split the data into training and testing sets (80/20). The Random Forest model was trained using 500 decision trees and evaluated based on Root Mean Squared Error (RMSE) on the test set. We assessed the relative importance of each predictor by measuring the increase in model error when that variable was removed (%IncMSE). The most impactful variables are presented in a variable importance plot."),
+                       
+                       p("Bars on the right show the percentage increase in out‑of‑bag mean‑squared error when each variable is permuted.  Larger values indicate stronger predictive importance.")
+                     )
+                   ),
+                   
+                   # ―― Main panel with plot ――――――――――――――――――――――――――――――――――――――――
+                   mainPanel(
+                     h4(tags$strong("Variable Importance (Random Forest)")),
+                     plotlyOutput("importancePlot", height = "600px")
+                   )
+                 )
+               )
              ),
              tabPanel("Predicting Employment Outcomes",
                       fluidPage(
@@ -527,7 +629,7 @@ ui <- navbarPage(
                                 ),
                                 tags$figcaption(
                                   style = "font-size: 0.9em; color: #555; text-align: center; margin-top: 5px;",
-                                  "Figure: Coefficient Chart" 
+                                  "Figure: Coefficient Chart of Multiple Models (Robustness Check)" 
                                 )
                               )
                             )
@@ -1818,9 +1920,37 @@ server <- function(input, output, session) {
       ggplotly(gg, tooltip = c("x", "y", "color"))
     }
   })
-}
 
 
+
+    output$importancePlot <- renderPlotly({
+      bar_color <- "#2e708c"  # dashboard-matching blue
+      
+      plot_ly(
+        data = rf_importance_sorted,
+        x = ~Increase_in_Error_Percent,
+        y = ~reorder(Clean_Var, Increase_in_Error_Percent),
+        type = 'bar',
+        orientation = 'h',
+        text = ~paste0(Clean_Var, "<br>Importance: ", round(Increase_in_Error_Percent, 2), "%"),
+        textposition = "none",
+        hoverinfo = 'text',
+        marker = list(color = bar_color)
+      ) %>%
+        layout(
+          title = list(text = "Variable Importance", font = list(family = "Times New Roman")),
+          xaxis = list(
+            title = "% Increase in Error When Removed",
+            tickfont = list(family = "Times New Roman"),
+            titlefont = list(family = "Times New Roman")
+          ),
+          yaxis = list(title = "", tickfont = list(family = "Times New Roman")),
+          margin = list(l = 150),
+          font = list(family = "Times New Roman"),
+          showlegend = FALSE
+        )
+    })
+  }
 
 
 
