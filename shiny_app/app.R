@@ -181,7 +181,7 @@ map_bins_fn <- function(var, values) {
   }
   
 #Rural urban cost map-------
-  RUdata <- read_excel("Data/Cleaned_Virginia_Womens_Bureau.xlsx") %>%
+  RUdata <- read_excel("Data/Cleaned_Virginia_Womens_Bureau.xlsx", na = c("NA", "n/a", "", "-")) %>%
     mutate(
       FIPS = str_pad(as.character(COUNTY_FIPS_CODE), 5, pad = "0"),
       MCINFANT = as.numeric(MCINFANT),
